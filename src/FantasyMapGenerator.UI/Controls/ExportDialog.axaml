@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:vm="clr-namespace:FantasyMapGenerator.UI.ViewModels"
+         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+         x:Class="FantasyMapGenerator.UI.Controls.ExportDialog"
+         x:DataType="vm:ExportDialogViewModel"
+         Title="Export Map"
+         Width="400" Height="300"
+         WindowStartupLocation="CenterOwner">
+    
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Export Settings -->
+        <StackPanel Spacing="10" Margin="10" Grid.Row="0">
+            <TextBlock Text="Export Settings" FontWeight="Bold" />
+            
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Text="Format:" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <ComboBox SelectedIndex="{Binding SelectedFormatIndex}" Grid.Column="1">
+                    <ComboBoxItem Content="PNG" />
+                    <ComboBoxItem Content="JPEG" />
+                    <ComboBoxItem Content="SVG" />
+                </ComboBox>
+            </Grid>
+            
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Text="Scale:" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <Slider Value="{Binding Scale}" 
+                        Minimum="0.5" Maximum="3.0" TickFrequency="0.5"
+                        Grid.Column="1" />
+            </Grid>
+            
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Text="Quality:" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,10,0" />
+                <Slider Value="{Binding Quality}" 
+                        Minimum="50" Maximum="100" TickFrequency="10"
+                        Grid.Column="1" />
+            </Grid>
+        </StackPanel>
+        
+        <!-- File Path -->
+        <StackPanel Spacing="5" Margin="10" Grid.Row="1">
+            <TextBlock Text="Output File:" FontWeight="Bold" />
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBox Text="{Binding FilePath}" Grid.Column="0" />
+                <Button Content="Browse..." Command="{Binding BrowseCommand}" Grid.Column="1" Margin="5,0,0,0" />
+            </Grid>
+        </StackPanel>
+        
+        <!-- Buttons -->
+        <StackPanel Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Spacing="10" 
+                    Margin="10" 
+                    Grid.Row="2">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" />
+            <Button Content="Export" Command="{Binding ExportCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

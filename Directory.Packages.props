@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core Dependencies -->
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
+    
+    <!-- SkiaSharp Dependencies -->
+    <PackageVersion Include="SkiaSharp" Version="2.88.8" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="2.88.8" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="2.88.8" />
+    <PackageVersion Include="SkiaSharp.Views" Version="2.88.8" />
+    
+    <!-- Avalonia Dependencies -->
+    <PackageVersion Include="Avalonia" Version="11.3.8" />
+    <PackageVersion Include="Avalonia.Desktop" Version="11.3.8" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.8" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.8" />
+    <PackageVersion Include="Avalonia.ReactiveUI" Version="11.3.8" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.8" />
+    
+    <!-- MVVM Dependencies -->
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    
+    <!-- Testing Dependencies -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="xunit" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+  </ItemGroup>
+</Project>

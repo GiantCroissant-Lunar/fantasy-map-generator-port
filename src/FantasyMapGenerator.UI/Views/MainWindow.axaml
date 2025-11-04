@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FantasyMapGenerator.UI.ViewModels"
+        xmlns:controls="using:FantasyMapGenerator.UI.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="FantasyMapGenerator.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Fantasy Map Generator">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="300,*">
+        <!-- Left Panel - Parameters -->
+        <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0">
+            <controls:MapParametersPanel x:Name="ParametersPanel" />
+        </Border>
+        
+        <!-- Right Panel - Map Display -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+            <!-- Toolbar -->
+            <Border Grid.Row="0" Background="LightGray" Padding="10">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Button Content="Generate Map" Command="{Binding GenerateNewMapCommand}" />
+                    <Button Content="Export..." Command="{Binding ExportMapCommand}" />
+                </StackPanel>
+            </Border>
+            
+            <!-- Map Display -->
+            <Border Grid.Row="1" Padding="10">
+                <controls:MapControl x:Name="MapDisplay" />
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

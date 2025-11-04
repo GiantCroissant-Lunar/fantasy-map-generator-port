@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:FantasyMapGenerator.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="400"
+             x:Class="FantasyMapGenerator.UI.Controls.MapParametersPanel"
+             x:DataType="vm:MapParametersViewModel">
+    
+    <ScrollViewer>
+        <StackPanel Spacing="10" Margin="10">
+            
+            <!-- Map Dimensions -->
+            <Expander Header="Map Dimensions" IsExpanded="True">
+                <StackPanel Spacing="5" Margin="0,10,0,0">
+                    <Grid ColumnDefinitions="*,*">
+                        <TextBlock Text="Width:" Grid.Column="0" VerticalAlignment="Center" />
+                        <NumericUpDown Value="{Binding Width}" 
+                                       Minimum="400" Maximum="2000" Increment="100"
+                                       Grid.Column="1" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*">
+                        <TextBlock Text="Height:" Grid.Column="0" VerticalAlignment="Center" />
+                        <NumericUpDown Value="{Binding Height}" 
+                                       Minimum="400" Maximum="2000" Increment="100"
+                                       Grid.Column="1" />
+                    </Grid>
+                </StackPanel>
+            </Expander>
+            
+            <!-- Generation Parameters -->
+            <Expander Header="Generation Parameters" IsExpanded="True">
+                <StackPanel Spacing="5" Margin="0,10,0,0">
+                    <Grid ColumnDefinitions="*,*">
+                        <TextBlock Text="Seed:" Grid.Column="0" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding SeedString}" Grid.Column="1" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*">
+                        <TextBlock Text="Points:" Grid.Column="0" VerticalAlignment="Center" />
+                        <NumericUpDown Value="{Binding NumPoints}" 
+                                       Minimum="500" Maximum="5000" Increment="100"
+                                       Grid.Column="1" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*">
+                        <TextBlock Text="Sea Level:" Grid.Column="0" VerticalAlignment="Center" />
+                        <Slider Value="{Binding SeaLevel}" 
+                                Minimum="0.1" Maximum="0.8" TickFrequency="0.05"
+                                Grid.Column="1" />
+                    </Grid>
+                </StackPanel>
+            </Expander>
+            
+            <!-- Rendering Settings -->
+            <Expander Header="Rendering Settings" IsExpanded="True">
+                <StackPanel Spacing="5" Margin="0,10,0,0">
+                    <CheckBox Content="Show Terrain" IsChecked="{Binding ShowTerrain}" />
+                    <CheckBox Content="Show Coastlines" IsChecked="{Binding ShowCoastlines}" />
+                    <CheckBox Content="Show Borders" IsChecked="{Binding ShowBorders}" />
+                    <CheckBox Content="Show Cities" IsChecked="{Binding ShowCities}" />
+                    <CheckBox Content="Show Labels" IsChecked="{Binding ShowLabels}" />
+                </StackPanel>
+            </Expander>
+            
+            <!-- Actions -->
+            <Button Content="Generate Map" 
+                    Command="{Binding GenerateMapCommand}"
+                    HorizontalAlignment="Stretch" />
+            
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

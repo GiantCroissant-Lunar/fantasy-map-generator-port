@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:FantasyMapGenerator.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="FantasyMapGenerator.UI.Controls.MapControl"
+             x:DataType="vm:MapControlViewModel">
+    
+    <Grid>
+        <Border Background="LightGray" CornerRadius="4">
+            <Image Source="{Binding MapImage}" 
+                   Stretch="Uniform"
+                   Width="{Binding MapWidth}"
+                   Height="{Binding MapHeight}" />
+        </Border>
+        
+        <!-- Loading overlay -->
+        <Panel IsVisible="{Binding IsLoading}">
+            <Border Background="#80000000" CornerRadius="4">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" Width="200" Margin="0,0,0,10" />
+                    <TextBlock Text="{Binding LoadingMessage}" 
+                               Foreground="White" 
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </Panel>
+    </Grid>
+</UserControl>
