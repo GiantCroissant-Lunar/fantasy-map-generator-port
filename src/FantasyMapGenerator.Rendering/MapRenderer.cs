@@ -143,10 +143,70 @@ public class MapRenderer : IDisposable
     /// </summary>
     private void RenderRivers(SKCanvas canvas, MapData mapData)
     {
-        var riverPaint = GetPaint("river");
-        
-        // This would be implemented when river generation is added
-        // For now, we'll skip river rendering
+        foreach (var river in mapData.Rivers)
+        {
+            // Build path from cell centers
+            using var path = new SKPath();
+
+            for (int i = 0; i < river.Cells.Count; i++)
+            {
+                var cell = mapData.Cells[river.Cells[i]];
+
+                if (i == 0)
+                {
+                    path.MoveTo((float)cell.Center.X, (float)cell.Center.Y);
+                }
+                else
+                {
+                    path.LineTo((float)cell.Center.X, (float)cell.Center.Y);
+                }
+            }
+
+            // Draw river
+            using var paint = new SKPaint
+            {
+                Color = river.IsSeasonal
+                    ? SKColors.LightBlue.WithAlpha(150)
+                    : SKColors.Blue,
+                Style = SKPaintStyle.Stroke,
+                StrokeWidth = river.Width,
+                IsAntialias = true,
+                StrokeCap = SKStrokeCap.Round,
+                StrokeJoin = SKStrokeJoin.Round
+            };
+
+            canvas.DrawPath(path, paint);
+
+            // Draw river name (if major river)
+            if (!string.IsNullOrEmpty(river.Name) && river.Width >= 5)
+            {
+                DrawRiverName(canvas, river.Name, river, mapData);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Draws river name at the middle of the river
+    /// </summary>
+    private void DrawRiverName(SKCanvas canvas, string text, River river, MapData mapData)
+    {
+        using var paint = new SKPaint
+        {
+            Color = SKColors.DarkBlue,
+            TextSize = 12,
+            IsAntialias = true,
+            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Italic)
+        };
+
+        // Draw text at the middle of the river
+        if (river.Cells.Count > 0)
+        {
+            var middleIndex = river.Cells.Count / 2;
+            var middleCell = mapData.Cells[river.Cells[middleIndex]];
+            var position = new SKPoint((float)middleCell.Center.X, (float)middleCell.Center.Y);
+            
+            canvas.DrawText(text, position.X, position.Y, paint);
+        }
     }
     
     /// <summary>

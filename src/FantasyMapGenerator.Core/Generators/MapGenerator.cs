@@ -24,7 +24,8 @@ public class MapGenerator
         // Create child RNGs for each subsystem (different streams)
         var terrainRng = CreateChildRng(rootRng, 1);
         var climateRng = CreateChildRng(rootRng, 2);
-        var politicalRng = CreateChildRng(rootRng, 3);
+        var hydrologyRng = CreateChildRng(rootRng, 3);
+        var politicalRng = CreateChildRng(rootRng, 4);
 
         var mapData = new MapData(settings.Width, settings.Height, settings.NumPoints);
         
@@ -63,6 +64,10 @@ public class MapGenerator
         // Generate biomes
         var biomeGenerator = new BiomeGenerator(mapData);
         biomeGenerator.GenerateBiomes(climateRng);
+        
+        // Generate hydrology (needs terrain + climate)
+        var hydrologyGenerator = new HydrologyGenerator(mapData, hydrologyRng);
+        hydrologyGenerator.Generate();
         
         // Generate basic states
         GenerateBasicStates(mapData, settings, politicalRng);

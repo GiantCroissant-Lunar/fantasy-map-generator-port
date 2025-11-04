@@ -150,12 +150,55 @@ public class MapData
 public class River
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public List<int> Cells { get; set; } = new();
+
+    /// <summary>
+    /// Source cell (highest point)
+    /// </summary>
     public int Source { get; set; } = -1;
+
+    /// <summary>
+    /// Mouth cell (where it enters ocean/lake)
+    /// </summary>
     public int Mouth { get; set; } = -1;
+
+    /// <summary>
+    /// Cells along river path (source → mouth)
+    /// </summary>
+    public List<int> Cells { get; set; } = new();
+
+    /// <summary>
+    /// River width (visual representation)
+    /// </summary>
+    public int Width { get; set; } = 1;
+
+    /// <summary>
+    /// River length (number of cells)
+    /// </summary>
     public double Length { get; set; }
-    public int Width { get; set; }
+
+    /// <summary>
+    /// River name (optional, for major rivers)
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Is this a seasonal/intermittent river?
+    /// </summary>
+    public bool IsSeasonal { get; set; }
+
+    /// <summary>
+    /// Parent river ID (for tributaries)
+    /// </summary>
+    public int? ParentRiver { get; set; }
+
+    /// <summary>
+    /// Tributary IDs
+    /// </summary>
+    public List<int> Tributaries { get; set; } = new();
+
+    /// <summary>
+    /// River type based on width and flow
+    /// </summary>
     public RiverType Type { get; set; }
 }
 

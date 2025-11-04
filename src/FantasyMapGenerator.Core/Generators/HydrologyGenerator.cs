@@ -50,6 +50,11 @@ public class HydrologyGenerator
         // Step 6: Calculate river widths
         CalculateRiverWidths();
 
+        // Step 7: Generate advanced features
+        GenerateDeltas();
+        IdentifySeasonalRivers();
+        GenerateRiverNames(_random);
+
         Console.WriteLine($"Generated {_map.Rivers.Count} rivers");
     }
 
@@ -412,6 +417,185 @@ public class HydrologyGenerator
                 <= 8 => RiverType.River,
                 _ => RiverType.MajorRiver
             };
+        }
+    }
+
+    /// <summary>
+    /// Create river deltas at mouths (split into multiple channels)
+    /// </summary>
+    private void GenerateDeltas()
+    {
+        foreach (var river in _map.Rivers)
+        {
+            var mouthCell = _map.Cells[river.Mouth];
+
+            // Only large rivers form deltas
+            int mouthAccumulation = _flowAccumulation.GetValueOrDefault(river.Mouth, 0);
+            if (mouthAccumulation < 500)
+                continue;
+
+            // Find coastal cells near mouth
+            var coastalCells = FindCoastalCells(mouthCell, radius: 5);
+
+            // Create 2-4 distributary channels
+            int channelCount = Math.Min(coastalCells.Count, 2 + mouthAccumulation / 1000);
+
+            for (int i = 0; i < channelCount; i++)
+            {
+                if (i < coastalCells.Count)
+                {
+                    var channelEnd = coastalCells[i];
+                    CreateDeltaChannel(mouthCell, channelEnd);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Find coastal cells near a center point
+    /// </summary>
+    private List<Cell> FindCoastalCells(Cell center, int radius)
+    {
+        var coastal = new List<Cell>();
+        var visited = new HashSet<int>();
+        var queue = new Queue<int>();
+
+        queue.Enqueue(center.Id);
+        visited.Add(center.Id);
+
+        for (int depth = 0; depth < radius && queue.Count > 0; depth++)
+        {
+            int count = queue.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                var cellId = queue.Dequeue();
+                var cell = _map.Cells[cellId];
+
+                // Check if coastal (land with ocean neighbor)
+                if (cell.Height > 0 && cell.Neighbors.Any(n => _map.Cells[n].Height == 0))
+                {
+                    coastal.Add(cell);
+                }
+
+                // Expand search
+                foreach (var neighborId in cell.Neighbors)
+                {
+                    if (!visited.Contains(neighborId))
+                    {
+                        queue.Enqueue(neighborId);
+                        visited.Add(neighborId);
+                    }
+                }
+            }
+        }
+
+        return coastal;
+    }
+
+    /// <summary>
+    /// Create a delta channel between two points
+    /// </summary>
+    private void CreateDeltaChannel(Cell start, Cell end)
+    {
+        // Simple implementation: mark cells along a straight path
+        // In a more sophisticated implementation, this would trace a realistic path
+        var current = start;
+        var target = end;
+        var visited = new HashSet<int>();
+
+        while (current.Id != target.Id && visited.Count < 20)
+        {
+            visited.Add(current.Id);
+            current.HasRiver = true;
+
+            // Find neighbor closest to target
+            Cell? nextNeighbor = null;
+            double minDistance = double.MaxValue;
+
+            foreach (var neighborId in current.Neighbors)
+            {
+                if (visited.Contains(neighborId))
+                    continue;
+
+                var neighbor = _map.Cells[neighborId];
+                var distance = Math.Sqrt(
+                    Math.Pow(neighbor.Center.X - target.Center.X, 2) +
+                    Math.Pow(neighbor.Center.Y - target.Center.Y, 2));
+
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nextNeighbor = neighbor;
+                }
+            }
+
+            if (nextNeighbor == null)
+                break;
+
+            current = nextNeighbor;
+        }
+
+        // Mark the end cell
+        if (target.Height > 0)
+        {
+            target.HasRiver = true;
+        }
+    }
+
+    /// <summary>
+    /// Mark rivers as seasonal based on climate
+    /// </summary>
+    private void IdentifySeasonalRivers()
+    {
+        foreach (var river in _map.Rivers)
+        {
+            // Calculate average precipitation along river
+            double avgPrecipitation = river.Cells
+                .Select(id => _map.Cells[id].Precipitation)
+                .Average();
+
+            // Low precipitation = seasonal river
+            river.IsSeasonal = avgPrecipitation < 30;
+
+            // Adjust width for seasonal rivers
+            if (river.IsSeasonal)
+            {
+                river.Width = (int)(river.Width * 0.5);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Generate names for major rivers
+    /// </summary>
+    private void GenerateRiverNames(IRandomSource random)
+    {
+        // Name prefixes/suffixes
+        var prefixes = new[] { "River", "Great", "Little", "North", "South", "East", "West" };
+        var names = new[] { "Alder", "Birch", "Cedar", "Dale", "Elm", "Fern", "Glen", "Hazel" };
+        var suffixes = new[] { "water", "stream", "flow", "rush", "brook" };
+
+        // Sort rivers by length (name longest first)
+        var sortedRivers = _map.Rivers
+            .OrderByDescending(r => r.Length)
+            .ThenByDescending(r => r.Width)
+            .ToList();
+
+        for (int i = 0; i < Math.Min(sortedRivers.Count, 20); i++)
+        {
+            var river = sortedRivers[i];
+
+            if (river.Width >= 5)
+            {
+                // Major river: "Great River" or "Riverdale"
+                river.Name = $"{prefixes[random.Next(prefixes.Length)]} {names[random.Next(names.Length)]}";
+            }
+            else
+            {
+                // Minor river: "Aldwater" or "Fernbrook"
+                river.Name = $"{names[random.Next(names.Length)]}{suffixes[random.Next(suffixes.Length)]}";
+            }
         }
     }
 }
