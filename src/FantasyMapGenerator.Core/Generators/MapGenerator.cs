@@ -35,9 +35,27 @@ public class MapGenerator
         // Create simple cells first (needed for heightmap generation)
         mapData.Cells = CreateSimpleCells(points, settings.Width, settings.Height);
         
-        // Generate simple heightmap
-        var heightmapGenerator = new HeightmapGenerator(mapData);
-        mapData.Heights = heightmapGenerator.FromNoise(terrainRng);
+        // Generate heightmap using either advanced noise or template system
+        if (settings.UseAdvancedNoise)
+        {
+            var noiseGenerator = new FastNoiseHeightmapGenerator((int)settings.Seed);
+            mapData.Heights = noiseGenerator.Generate(mapData, settings);
+        }
+        else
+        {
+            // Use existing template-based generator
+            var heightmapGenerator = new HeightmapGenerator(mapData);
+            
+            // Use template if specified, otherwise use noise
+            if (!string.IsNullOrEmpty(settings.HeightmapTemplate))
+            {
+                mapData.Heights = heightmapGenerator.FromTemplate(settings.HeightmapTemplate, terrainRng);
+            }
+            else
+            {
+                mapData.Heights = heightmapGenerator.FromNoise(terrainRng);
+            }
+        }
         
         // Apply heights to cells
         ApplyHeightsToCells(mapData);
@@ -64,8 +82,6 @@ public class MapGenerator
         int childSeed = parent.Next();
         return new SystemRandomSource(childSeed);
     }
-    
-
     
     private List<Cell> CreateSimpleCells(List<Point> points, int width, int height)
     {
@@ -134,8 +150,6 @@ public class MapGenerator
             }
         }
     }
-    
-
     
     private double Distance(Point a, Point b)
     {

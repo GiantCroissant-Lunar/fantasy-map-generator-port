@@ -68,10 +68,52 @@ public class MapGenerationSettings
     public string MapNameTemplate { get; set; } = "Fantasy Map";
     
     /// <summary>
+    /// Heightmap template name (for backward compatibility)
+    /// </summary>
+    public string? HeightmapTemplate { get; set; }
+    
+    /// <summary>
     /// RNG algorithm: "System" or "PCG" (default: PCG)
     /// </summary>
     public string RandomAlgorithm { get; set; } = "PCG";
     
+    // === Advanced Noise Settings ===
+    
+    /// <summary>
+    /// Use FastNoiseLite for advanced terrain generation
+    /// </summary>
+    public bool UseAdvancedNoise { get; set; } = false;
+    
+    /// <summary>
+    /// Noise type: OpenSimplex2, Perlin, Value, Cellular, etc.
+    /// </summary>
+    public string NoiseType { get; set; } = "OpenSimplex2";
+    
+    /// <summary>
+    /// Fractal type: FBm, Ridged, PingPong
+    /// </summary>
+    public string FractalType { get; set; } = "FBm";
+    
+    /// <summary>
+    /// Number of octaves (3-6 typical)
+    /// </summary>
+    public int Octaves { get; set; } = 4;
+    
+    /// <summary>
+    /// Noise frequency (lower = larger features)
+    /// </summary>
+    public float Frequency { get; set; } = 0.8f;
+    
+    /// <summary>
+    /// Domain warping strength (0 = disabled)
+    /// </summary>
+    public float DomainWarpStrength { get; set; } = 0.0f;
+
+    /// <summary>
+    /// Domain warp type: OpenSimplex2, OpenSimplex2Reduced, BasicGrid
+    /// </summary>
+    public string DomainWarpType { get; set; } = "OpenSimplex2";
+
     /// <summary>
     /// Create RNG instance based on settings
     /// </summary>
