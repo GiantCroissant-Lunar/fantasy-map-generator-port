@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FantasyMapGenerator.Desktop")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e133c79752cb4ef5aa76c05f42e205701b19ca87")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8a21af54cfc02ffb4bf48a0830c0f667bf4b95fc")]
 [assembly: System.Reflection.AssemblyProductAttribute("FantasyMapGenerator.Desktop")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FantasyMapGenerator.Desktop")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

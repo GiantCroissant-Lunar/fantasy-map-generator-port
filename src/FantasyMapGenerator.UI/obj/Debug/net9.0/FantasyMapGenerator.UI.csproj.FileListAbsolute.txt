@@ -93,3 +93,7 @@
 /Users/apprenticegc/Work/lunar-snake/personal-work/plate-projects/fantasy-map-generator-port/src/FantasyMapGenerator.UI/obj/Debug/net9.0/FantasyMapGenerator.UI.pdb
 /Users/apprenticegc/Work/lunar-snake/personal-work/plate-projects/fantasy-map-generator-port/src/FantasyMapGenerator.UI/obj/Debug/net9.0/FantasyMapGenerator.UI.genruntimeconfig.cache
 /Users/apprenticegc/Work/lunar-snake/personal-work/plate-projects/fantasy-map-generator-port/src/FantasyMapGenerator.UI/obj/Debug/net9.0/ref/FantasyMapGenerator.UI.dll
+/Users/apprenticegc/Work/lunar-snake/personal-work/plate-projects/fantasy-map-generator-port/src/FantasyMapGenerator.UI/bin/Debug/net9.0/NetTopologySuite.dll
+/Users/apprenticegc/Work/lunar-snake/personal-work/plate-projects/fantasy-map-generator-port/src/FantasyMapGenerator.UI/bin/Debug/net9.0/NetTopologySuite.Features.dll
+/Users/apprenticegc/Work/lunar-snake/personal-work/plate-projects/fantasy-map-generator-port/src/FantasyMapGenerator.UI/bin/Debug/net9.0/NetTopologySuite.IO.GeoJSON.dll
+/Users/apprenticegc/Work/lunar-snake/personal-work/plate-projects/fantasy-map-generator-port/src/FantasyMapGenerator.UI/bin/Debug/net9.0/Newtonsoft.Json.dll

@@ -45,6 +45,18 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
+          "dependencies": {
+            "NetTopologySuite": {
+              "target": "Package",
+              "version": "[2.6.0, )",
+              "versionCentrallyManaged": true
+            },
+            "NetTopologySuite.IO.GeoJSON": {
+              "target": "Package",
+              "version": "[3.0.0, )",
+              "versionCentrallyManaged": true
+            }
+          },
           "centralPackageVersions": {
             "Avalonia": "11.3.8",
             "Avalonia.Desktop": "11.3.8",
@@ -56,6 +68,8 @@
             "CommunityToolkit.Mvvm": "8.2.1",
             "coverlet.collector": "6.0.2",
             "Microsoft.NET.Test.Sdk": "17.12.0",
+            "NetTopologySuite": "2.6.0",
+            "NetTopologySuite.IO.GeoJSON": "3.0.0",
             "SkiaSharp": "2.88.8",
             "SkiaSharp.NativeAssets.Linux": "2.88.8",
             "SkiaSharp.NativeAssets.macOS": "2.88.8",

@@ -37,6 +37,10 @@
 /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.9/ref/net9.0/Microsoft.Win32.Registry.dll
 /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.9/ref/net9.0/mscorlib.dll
 /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.9/ref/net9.0/netstandard.dll
+/Users/apprenticegc/.nuget/packages/nettopologysuite/2.6.0/lib/netstandard2.1/NetTopologySuite.dll
+/Users/apprenticegc/.nuget/packages/nettopologysuite.features/2.0.0/lib/netstandard2.0/NetTopologySuite.Features.dll
+/Users/apprenticegc/.nuget/packages/nettopologysuite.io.geojson/3.0.0/lib/netstandard2.0/NetTopologySuite.IO.GeoJSON.dll
+/Users/apprenticegc/.nuget/packages/newtonsoft.json/9.0.1/lib/netstandard1.0/Newtonsoft.Json.dll
 /Users/apprenticegc/.nuget/packages/opentk/3.1.0/lib/net20/OpenTK.dll
 /Users/apprenticegc/.nuget/packages/opentk.glcontrol/3.1.0/lib/net20/OpenTK.GLControl.dll
 /Users/apprenticegc/.nuget/packages/reactiveui/20.1.1/lib/net8.0/ReactiveUI.dll

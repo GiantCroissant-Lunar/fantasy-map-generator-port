@@ -18,6 +18,7 @@
     <Import Project="$(NuGetPackageRoot)avalonia/11.3.8/buildTransitive/Avalonia.props" Condition="Exists('$(NuGetPackageRoot)avalonia/11.3.8/buildTransitive/Avalonia.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgNewtonsoft_Json Condition=" '$(PkgNewtonsoft_Json)' == '' ">/Users/apprenticegc/.nuget/packages/newtonsoft.json/9.0.1</PkgNewtonsoft_Json>
     <PkgAvalonia_BuildServices Condition=" '$(PkgAvalonia_BuildServices)' == '' ">/Users/apprenticegc/.nuget/packages/avalonia.buildservices/11.3.1</PkgAvalonia_BuildServices>
     <PkgAvalonia Condition=" '$(PkgAvalonia)' == '' ">/Users/apprenticegc/.nuget/packages/avalonia/11.3.8</PkgAvalonia>
   </PropertyGroup>
