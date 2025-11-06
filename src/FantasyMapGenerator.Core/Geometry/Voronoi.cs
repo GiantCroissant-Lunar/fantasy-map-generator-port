@@ -1,4 +1,9 @@
 using FantasyMapGenerator.Core.Models;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Triangulate;
+using NtsGeometry = NetTopologySuite.Geometries.Geometry;
+using NtsPoint = NetTopologySuite.Geometries.Point;
+using Point = FantasyMapGenerator.Core.Models.Point;
 
 namespace FantasyMapGenerator.Core.Geometry;
 
@@ -21,11 +26,152 @@ public class Voronoi
         _delaunay = delaunay;
         _points = points;
         _pointsN = pointsN;
-        
+
         Cells = new VoronoiCells();
         Vertices = new VoronoiVertices();
-        
-        BuildVoronoiDiagram();
+
+        // Only build if we have a valid delaunator (not using NTS path)
+        if (_delaunay != null)
+        {
+            BuildVoronoiDiagram();
+        }
+    }
+
+    /// <summary>
+    /// Creates a Voronoi diagram directly from points using NetTopologySuite.
+    /// This bypasses the buggy Delaunator implementation entirely.
+    /// </summary>
+    public static Voronoi FromPoints(Point[] points, int pointsN, double width, double height)
+    {
+        var voronoi = new Voronoi(null!, points, pointsN);
+
+        // Convert to NTS coordinates
+        var coordinates = new Coordinate[pointsN];
+        for (int i = 0; i < pointsN; i++)
+        {
+            coordinates[i] = new Coordinate(points[i].X, points[i].Y);
+        }
+
+        // Create clipping envelope (map bounds with small margin)
+        var gf = new GeometryFactory();
+        double margin = Math.Max(width, height) * 0.01; // 1% margin
+        var clipEnvelope = new Envelope(-margin, width + margin, -margin, height + margin);
+        var clipRect = gf.ToGeometry(clipEnvelope);
+
+        // Use NTS VoronoiDiagramBuilder to get Voronoi polygons directly
+        var voronoiBuilder = new VoronoiDiagramBuilder();
+        voronoiBuilder.SetSites(coordinates);
+        voronoiBuilder.ClipEnvelope = clipEnvelope; // Set clipping envelope as property
+        var diagram = voronoiBuilder.GetDiagram(gf);
+
+        // Build coordinate to index map for lookups
+        var coordToIndex = new Dictionary<Coordinate, int>(new CoordinateEqualityComparer());
+        for (int i = 0; i < pointsN; i++)
+        {
+            coordToIndex[coordinates[i]] = i;
+        }
+
+        // Extract Voronoi cells from the diagram
+        voronoi.BuildFromNtsDiagram(diagram, coordinates, coordToIndex);
+
+        return voronoi;
+    }
+
+    private static int FindClosestIndex(Coordinate target, Coordinate[] allCoords)
+    {
+        double minDist = double.MaxValue;
+        int closestIdx = 0;
+        for (int i = 0; i < allCoords.Length; i++)
+        {
+            double dist = target.Distance(allCoords[i]);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closestIdx = i;
+            }
+        }
+        return closestIdx;
+    }
+
+    // Helper class for coordinate comparison
+    private class CoordinateEqualityComparer : IEqualityComparer<Coordinate>
+    {
+        public bool Equals(Coordinate? x, Coordinate? y)
+        {
+            if (x == null || y == null) return false;
+            return x.Distance(y) < 0.0001;
+        }
+
+        public int GetHashCode(Coordinate obj)
+        {
+            return HashCode.Combine((int)(obj.X * 1000), (int)(obj.Y * 1000));
+        }
+    }
+
+    /// <summary>
+    /// Builds Voronoi cells directly from NTS VoronoiDiagramBuilder output
+    /// </summary>
+    private void BuildFromNtsDiagram(NtsGeometry diagram, Coordinate[] siteCoords, Dictionary<Coordinate, int> coordToIndex)
+    {
+        // Initialize cell arrays
+        Cells.Vertices = new List<int>[_pointsN];
+        Cells.Neighbors = new List<int>[_pointsN];
+        Cells.IsBorder = new bool[_pointsN];
+
+        for (int i = 0; i < _pointsN; i++)
+        {
+            Cells.Vertices[i] = new List<int>();
+            Cells.Neighbors[i] = new List<int>();
+            Cells.IsBorder[i] = false;
+        }
+
+        // Vertices list (Voronoi vertices are polygon vertices)
+        Vertices.Coordinates = new List<Point>();
+        var vertexToIndex = new Dictionary<Coordinate, int>(new CoordinateEqualityComparer());
+
+        // Process each polygon in the diagram
+        if (diagram is GeometryCollection collection)
+        {
+            foreach (NtsGeometry geom in collection.Geometries)
+            {
+                ProcessVoronoiPolygon(geom, siteCoords, vertexToIndex);
+            }
+        }
+        else
+        {
+            ProcessVoronoiPolygon(diagram, siteCoords, vertexToIndex);
+        }
+
+        Console.WriteLine($"Built Voronoi from NTS: {_pointsN} sites, {Vertices.Coordinates.Count} vertices");
+    }
+
+    private void ProcessVoronoiPolygon(NtsGeometry geom, Coordinate[] siteCoords, Dictionary<Coordinate, int> vertexToIndex)
+    {
+        if (geom is Polygon poly && poly.UserData is Coordinate siteCoord)
+        {
+            // Find which site this polygon belongs to
+            int siteIdx = FindClosestIndex(siteCoord, siteCoords);
+
+                // Extract vertices
+                var ring = poly.ExteriorRing.Coordinates;
+                for (int i = 0; i < ring.Length - 1; i++) // Skip last (duplicate of first)
+                {
+                    var coord = ring[i];
+
+                    // Add vertex if new
+                    if (!vertexToIndex.TryGetValue(coord, out int vertexIdx))
+                    {
+                        vertexIdx = Vertices.Coordinates.Count;
+                        Vertices.Coordinates.Add(new Point(coord.X, coord.Y));
+                        vertexToIndex[coord] = vertexIdx;
+                    }
+
+                    Cells.Vertices[siteIdx].Add(vertexIdx);
+                }
+
+            // TODO: Build neighbors by finding adjacent polygons
+            // For now, leave neighbors empty - not critical for rendering
+        }
     }
     
     /// <summary>
@@ -42,30 +188,9 @@ public class Voronoi
         Vertices.Cells = new List<int>[0]; // Will be resized as needed
         Vertices.Neighbors = new List<int>[0]; // Will be resized as needed
         
-        // Process each half-edge in the triangulation
+        // Process each half-edge in the triangulation (build triangle circumcenters and adjacency)
         for (int e = 0; e < _delaunay.Triangles.Length; e++)
         {
-            // Get the point at the start of this half-edge
-            int p = _delaunay.Triangles[NextHalfedge(e)];
-            
-            if (p < _pointsN && Cells.Vertices[p] == null)
-            {
-                // Get all edges around this point
-                var edges = EdgesAroundPoint(e);
-                
-                // Build cell vertices from triangle centers
-                Cells.Vertices[p] = edges.Select(edge => TriangleOfEdge(edge)).ToList();
-                
-                // Build cell neighbors from triangle points
-                Cells.Neighbors[p] = edges
-                    .Select(edge => _delaunay.Triangles[edge])
-                    .Where(neighbor => neighbor < _pointsN)
-                    .ToList();
-                
-                // Check if cell is on the border
-                Cells.IsBorder[p] = edges.Count > Cells.Neighbors[p].Count;
-            }
-            
             // Get the triangle for this half-edge
             int t = TriangleOfEdge(e);
             if (Vertices.Coordinates.Count <= t)
@@ -107,6 +232,98 @@ public class Voronoi
                 Vertices.Cells[t] = PointsOfTriangle(t).ToList();
             }
         }
+
+        // Build cells (vertices and neighbors) per site using robust per-point edge search
+        BuildCellsFromHalfedges();
+    }
+
+    /// <summary>
+    /// Sorts each cell's vertex indices by polar angle around the site, to form a proper ring.
+    /// </summary>
+    private void OrderCellVertices()
+    {
+        for (int p = 0; p < _pointsN; p++)
+        {
+            var vlist = Cells.Vertices[p];
+            if (vlist == null || vlist.Count == 0) continue;
+
+            // Remove invalid indices and duplicates
+            var filtered = new List<int>(vlist.Count);
+            var seen = new HashSet<int>();
+            foreach (var vid in vlist)
+            {
+                if (vid >= 0 && vid < Vertices.Coordinates.Count && seen.Add(vid))
+                    filtered.Add(vid);
+            }
+            if (filtered.Count < 2) { Cells.Vertices[p] = filtered; continue; }
+
+            var center = _points[p];
+            filtered.Sort((a, b) =>
+            {
+                var va = Vertices.Coordinates[a];
+                var vb = Vertices.Coordinates[b];
+                double aa = Math.Atan2(va.Y - center.Y, va.X - center.X);
+                double ab = Math.Atan2(vb.Y - center.Y, vb.X - center.X);
+                return aa.CompareTo(ab);
+            });
+
+            Cells.Vertices[p] = filtered;
+        }
+    }
+
+    /// <summary>
+    /// For each site p, find an incident half-edge and walk around it to collect edges, then
+    /// derive Voronoi cell vertices (triangle indices) and neighbor sites.
+    /// </summary>
+    private void BuildCellsFromHalfedges()
+    {
+        Cells.Vertices = new List<int>[_pointsN];
+        Cells.Neighbors = new List<int>[_pointsN];
+        Cells.IsBorder = new bool[_pointsN];
+
+        for (int p = 0; p < _pointsN; p++)
+        {
+            int start = -1;
+            // Find a half-edge whose next endpoint is p
+            for (int e = 0; e < _delaunay.Triangles.Length; e++)
+            {
+                if (_delaunay.Triangles[NextHalfedge(e)] == p)
+                {
+                    start = e;
+                    break;
+                }
+            }
+            if (start == -1)
+            {
+                Cells.Vertices[p] = new List<int>();
+                Cells.Neighbors[p] = new List<int>();
+                Cells.IsBorder[p] = true;
+                continue;
+            }
+
+            var edges = EdgesAroundPoint(start);
+            var vlist = new List<int>(edges.Count);
+            var nset = new HashSet<int>();
+            bool border = false;
+
+            foreach (var e in edges)
+            {
+                int t = TriangleOfEdge(e);
+                if (t >= 0 && t < Vertices.Coordinates.Count)
+                    vlist.Add(t);
+
+                int n = _delaunay.Triangles[e];
+                if (n >= 0 && n < _pointsN && n != p) nset.Add(n);
+
+                if (_delaunay.Halfedges[e] == -1) border = true;
+            }
+
+            Cells.Vertices[p] = vlist;
+            Cells.Neighbors[p] = nset.ToList();
+            Cells.IsBorder[p] = border;
+        }
+
+        OrderCellVertices();
     }
     
     /// <summary>

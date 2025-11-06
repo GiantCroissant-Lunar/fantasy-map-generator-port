@@ -198,14 +198,28 @@ public class HydrologyGenerator
 
     /// <summary>
     /// Generate rivers from high flow accumulation
+    /// Uses threshold matching the original Fantasy Map Generator
     /// </summary>
     private void GenerateRivers()
     {
         _map.Rivers = new List<River>();
 
-        // Threshold: minimum accumulation to form a river
-        int threshold = (int)(_map.Cells.Count * 0.005); // ~0.5% of cells
-        threshold = Math.Max(threshold, 5); // Lower threshold for test maps
+        // Original FMG uses MIN_FLUX_TO_FORM_RIVER = 30
+        // with flux modified by: (cellCount / 10000) ** 0.25
+        // This gives us the effective threshold in cell-accumulation units
+        double cellsNumberModifier = Math.Pow(_map.Cells.Count / 10000.0, 0.25);
+
+        // The original accumulates precipitation (typically 20-60 range) divided by modifier
+        // So threshold ~30 in flux units translates to roughly:
+        // 30 * modifier / avgPrecipitation ≈ cells needed to accumulate enough water
+        // For simplicity, we use a scaled threshold based on cell count
+        const int MIN_FLUX_TO_FORM_RIVER = 30;
+        int threshold = (int)(MIN_FLUX_TO_FORM_RIVER * cellsNumberModifier);
+
+        // Lower bound for very small maps
+        threshold = Math.Max(threshold, 10);
+
+        Console.WriteLine($"River formation threshold: {threshold} (cells: {_map.Cells.Count}, modifier: {cellsNumberModifier:F2})");
 
         var visited = new HashSet<int>();
 
@@ -215,7 +229,7 @@ public class HydrologyGenerator
             .Where(kvp => _map.Cells[kvp.Key].Height > 0) // Not ocean
             .OrderByDescending(kvp => kvp.Value)
             .Select(kvp => kvp.Key)
-            .Take(100); // Limit number of rivers
+            .Take(200); // Increased from 100 to allow more rivers
 
         foreach (var sourceId in riverSources)
         {

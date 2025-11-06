@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\FantasyMapGenerator.Core\FantasyMapGenerator.Core.csproj" />
+    <ProjectReference Include="..\..\src\FantasyMapGenerator.Rendering\FantasyMapGenerator.Rendering.csproj" />
   </ItemGroup>
 
   <ItemGroup>

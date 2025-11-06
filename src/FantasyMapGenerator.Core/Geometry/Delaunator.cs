@@ -15,8 +15,8 @@ public class Delaunator
     private readonly int[] _hullTri;
     private readonly int[] _hullHash;
     
-    public int[] Triangles { get; private set; }
-    public int[] Halfedges { get; private set; }
+    public int[] Triangles { get; protected set; }
+    public int[] Halfedges { get; protected set; }
     public int HullStart { get; private set; }
     public int HullSize { get; private set; }
     
@@ -29,9 +29,11 @@ public class Delaunator
         int n = coords.Length >> 1;
         
         // arrays that will store the triangulation graph
+        // Start with reasonable initial size, will grow as needed
         int maxTriangles = Math.Max(2 * n - 5, 0);
-        Triangles = new int[maxTriangles * 3];
-        Halfedges = new int[maxTriangles * 3];
+        int initialSize = Math.Max(maxTriangles * 3, 12); // At least size 12 to avoid early resizing
+        Triangles = new int[initialSize];
+        Halfedges = new int[initialSize];
         
         // temporary arrays for tracking the edges of the advancing convex hull
         _hashSize = (int)Math.Ceiling(Math.Sqrt(n));
@@ -258,6 +260,14 @@ public class Delaunator
             while (true)
             {
                 int e = currentEdge * 3;
+
+                // Bounds check to prevent index out of range
+                if (e + 2 >= Triangles.Length || currentEdge >= trianglesLen)
+                {
+                    // Invalid edge reference, break out
+                    break;
+                }
+
                 int a = Triangles[e];
                 int b = Triangles[e + 1];
                 int c = Triangles[e + 2];
@@ -377,15 +387,27 @@ public class Delaunator
     private int AddTriangle(int i0, int i1, int i2, int a, int b, int c, ref int trianglesLen)
     {
         int t = trianglesLen;
-        
+
+        // Ensure arrays are large enough - grow if needed
+        int requiredSize = (t + 1) * 3;
+        if (requiredSize > Triangles.Length)
+        {
+            var triangles = Triangles;
+            var halfedges = Halfedges;
+            Array.Resize(ref triangles, triangles.Length * 2);
+            Array.Resize(ref halfedges, halfedges.Length * 2);
+            Triangles = triangles;
+            Halfedges = halfedges;
+        }
+
         Triangles[t * 3] = i0;
         Triangles[t * 3 + 1] = i1;
         Triangles[t * 3 + 2] = i2;
-        
+
         Halfedges[t * 3] = a;
         Halfedges[t * 3 + 1] = b;
         Halfedges[t * 3 + 2] = c;
-        
+
         trianglesLen++;
         return t;
     }

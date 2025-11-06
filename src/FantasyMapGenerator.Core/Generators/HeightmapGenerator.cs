@@ -321,18 +321,98 @@ public class HeightmapGenerator
     
     /// <summary>
     /// Gets the blob power based on the number of cells
+    /// Port of getBlobPower from original heightmap-generator.js
     /// </summary>
     private static double GetBlobPower(int cellsDesired)
     {
-        return Math.Max(1.5, 3.0 - Math.Sqrt(cellsDesired / 1000.0));
+        // Original lookup table from JavaScript
+        var blobPowerMap = new Dictionary<int, double>
+        {
+            { 1000, 0.93 },
+            { 2000, 0.95 },
+            { 5000, 0.97 },
+            { 10000, 0.98 },
+            { 20000, 0.99 },
+            { 30000, 0.991 },
+            { 40000, 0.993 },
+            { 50000, 0.994 },
+            { 60000, 0.995 },
+            { 70000, 0.9955 },
+            { 80000, 0.996 },
+            { 90000, 0.9964 },
+            { 100000, 0.9973 }
+        };
+
+        // Find closest match
+        if (blobPowerMap.TryGetValue(cellsDesired, out var exact))
+            return exact;
+
+        // Interpolate or use default
+        var keys = blobPowerMap.Keys.OrderBy(k => k).ToList();
+        if (cellsDesired < keys[0])
+            return blobPowerMap[keys[0]];
+        if (cellsDesired > keys[^1])
+            return blobPowerMap[keys[^1]];
+
+        // Linear interpolation
+        for (int i = 0; i < keys.Count - 1; i++)
+        {
+            if (cellsDesired >= keys[i] && cellsDesired <= keys[i + 1])
+            {
+                double t = (double)(cellsDesired - keys[i]) / (keys[i + 1] - keys[i]);
+                return blobPowerMap[keys[i]] + t * (blobPowerMap[keys[i + 1]] - blobPowerMap[keys[i]]);
+            }
+        }
+
+        return 0.98; // Default fallback
     }
-    
+
     /// <summary>
     /// Gets the line power based on the number of cells
+    /// Port of getLinePower from original heightmap-generator.js
     /// </summary>
     private static double GetLinePower(int cellsDesired)
     {
-        return Math.Max(1.5, 2.5 - Math.Sqrt(cellsDesired / 1000.0));
+        // Original lookup table from JavaScript
+        var linePowerMap = new Dictionary<int, double>
+        {
+            { 1000, 0.75 },
+            { 2000, 0.77 },
+            { 5000, 0.79 },
+            { 10000, 0.81 },
+            { 20000, 0.82 },
+            { 30000, 0.83 },
+            { 40000, 0.84 },
+            { 50000, 0.86 },
+            { 60000, 0.87 },
+            { 70000, 0.88 },
+            { 80000, 0.91 },
+            { 90000, 0.92 },
+            { 100000, 0.93 }
+        };
+
+        // Find closest match
+        if (linePowerMap.TryGetValue(cellsDesired, out var exact))
+            return exact;
+
+        // Interpolate or use default
+        var keys = linePowerMap.Keys.OrderBy(k => k).ToList();
+        if (cellsDesired < keys[0])
+            return linePowerMap[keys[0]];
+        if (cellsDesired > keys[^1])
+            return linePowerMap[keys[^1]];
+
+        // Linear interpolation
+        for (int i = 0; i < keys.Count - 1; i++)
+        {
+            if (cellsDesired >= keys[i] && cellsDesired <= keys[i + 1])
+            {
+                double t = (double)(cellsDesired - keys[i]) / (keys[i + 1] - keys[i]);
+                return linePowerMap[keys[i]] + t * (linePowerMap[keys[i + 1]] - linePowerMap[keys[i]]);
+            }
+        }
+
+        return 0.81; // Default fallback
     }
 }
 

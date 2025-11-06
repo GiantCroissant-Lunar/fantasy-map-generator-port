@@ -54,7 +54,9 @@ public partial class MapControlViewModel : ObservableObject
                 Height = MapHeight,
                 Seed = DateTime.Now.Ticks,
                 NumPoints = 1000,
-                SeaLevel = 0.3f
+                SeaLevel = 0.3f,
+                UseAdvancedNoise = true,
+                HeightmapTemplate = "island"
             };
             
             // Generate map data

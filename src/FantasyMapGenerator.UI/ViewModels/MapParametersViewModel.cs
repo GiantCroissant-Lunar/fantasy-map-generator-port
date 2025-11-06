@@ -41,7 +41,13 @@ public partial class MapParametersViewModel : ObservableObject
     
     [ObservableProperty]
     private bool _showLabels = true;
-    
+
+    [ObservableProperty]
+    private bool _useAdvancedNoise = true;
+
+    [ObservableProperty]
+    private string _heightmapTemplate = "island";
+
     public MapGenerationSettings GetGenerationSettings()
     {
         return new MapGenerationSettings
@@ -50,7 +56,9 @@ public partial class MapParametersViewModel : ObservableObject
             Height = Height,
             Seed = Seed,
             NumPoints = NumPoints,
-            SeaLevel = SeaLevel
+            SeaLevel = SeaLevel,
+            UseAdvancedNoise = UseAdvancedNoise,
+            HeightmapTemplate = HeightmapTemplate
         };
     }
     

@@ -30,7 +30,16 @@ public class MapGenerator
         var mapData = new MapData(settings.Width, settings.Height, settings.NumPoints);
         
         // Generate random points
-        var points = GeometryUtils.GeneratePoissonDiskPoints(settings.Width, settings.Height, settings.NumPoints, terrainRng);
+        // settings.NumPoints is a target count, but GeneratePoissonDiskPoints expects a minimum distance.
+        // Use the same scale heuristic as MapData does for cell sizing.
+        var target = Math.Max(1, settings.NumPoints);
+        var minDistance = Math.Sqrt((double)settings.Width * settings.Height / target);
+        var points = GeometryUtils.GeneratePoissonDiskPoints(settings.Width, settings.Height, minDistance, terrainRng);
+        if (points.Count < target / 5)
+        {
+            // Fallback to uniform grid distribution if Poisson produced too few sites
+            points = GeometryUtils.GenerateUniformGridPoints(settings.Width, settings.Height, target, terrainRng);
+        }
         mapData.Points = points;
         
         // Create simple cells first (needed for heightmap generation)
@@ -40,16 +49,26 @@ public class MapGenerator
         GenerateVoronoiDiagram(mapData, points, settings.Width, settings.Height);
         
         // Generate heightmap using either advanced noise or template system
+        Console.WriteLine($"[MapGen] UseAdvancedNoise: {settings.UseAdvancedNoise}, Template: {settings.HeightmapTemplate ?? "null"}");
+
         if (settings.UseAdvancedNoise)
         {
+            Console.WriteLine("[MapGen] Using FastNoiseHeightmapGenerator");
             var noiseGenerator = new FastNoiseHeightmapGenerator((int)settings.Seed);
             mapData.Heights = noiseGenerator.Generate(mapData, settings);
+
+            // Print stats
+            var avg = mapData.Heights.Average(h => (double)h);
+            var land = mapData.Heights.Count(h => h > 30);
+            var landPercent = (land * 100.0) / mapData.Heights.Length;
+            Console.WriteLine($"[MapGen] FastNoise Result - Avg: {avg:F1}, Land: {landPercent:F1}%, Range: {mapData.Heights.Min()}-{mapData.Heights.Max()}");
         }
         else
         {
+            Console.WriteLine("[MapGen] Using old HeightmapGenerator");
             // Use existing template-based generator
             var heightmapGenerator = new HeightmapGenerator(mapData);
-            
+
             // Use template if specified, otherwise use noise
             if (!string.IsNullOrEmpty(settings.HeightmapTemplate))
             {
@@ -59,6 +78,12 @@ public class MapGenerator
             {
                 mapData.Heights = heightmapGenerator.FromNoise(terrainRng);
             }
+
+            // Print stats
+            var avg = mapData.Heights.Average(h => (double)h);
+            var land = mapData.Heights.Count(h => h > 30);
+            var landPercent = (land * 100.0) / mapData.Heights.Length;
+            Console.WriteLine($"[MapGen] Old Result - Avg: {avg:F1}, Land: {landPercent:F1}%, Range: {mapData.Heights.Min()}-{mapData.Heights.Max()}");
         }
         
         // Apply heights to cells
@@ -95,76 +120,51 @@ public class MapGenerator
     {
         try
         {
-            // Create Delaunay triangulation
-            var coords = new double[points.Count * 2];
-            for (int i = 0; i < points.Count; i++)
-            {
-                coords[i * 2] = points[i].X;
-                coords[i * 2 + 1] = points[i].Y;
-            }
-            var delaunay = new Delaunator(coords);
-            
-            // Generate Voronoi diagram
-            var voronoi = new Voronoi(delaunay, points.ToArray(), points.Count);
+            // Generate Voronoi diagram directly from points using NTS with boundary clipping
+            var voronoi = Voronoi.FromPoints(points.ToArray(), points.Count, width, height);
             
             // Update map data with Voronoi vertices
             mapData.Vertices.Clear();
             mapData.Vertices.AddRange(voronoi.Vertices.Coordinates);
             
             // Update cells with their vertices and neighbors
+            int cellsWithVertices = 0;
+            int cellsWithoutVertices = 0;
             for (int i = 0; i < mapData.Cells.Count && i < voronoi.Cells.Vertices.Length; i++)
             {
                 var cell = mapData.Cells[i];
                 var cellVertices = voronoi.Cells.Vertices[i];
                 var cellNeighbors = voronoi.Cells.Neighbors[i];
-                
-                if (cellVertices != null)
+
+                if (cellVertices != null && cellVertices.Count > 0)
                 {
                     cell.Vertices.Clear();
                     cell.Vertices.AddRange(cellVertices);
+                    cellsWithVertices++;
                 }
-                
+                else
+                {
+                    cellsWithoutVertices++;
+                }
+
                 if (cellNeighbors != null)
                 {
                     cell.Neighbors.Clear();
                     cell.Neighbors.AddRange(cellNeighbors);
                 }
-                
+
                 cell.IsBorder = voronoi.IsCellBorder(i);
             }
+
+            Console.WriteLine($"Voronoi: {cellsWithVertices} cells with vertices, {cellsWithoutVertices} without, {mapData.Vertices.Count} total vertices");
         }
         catch (Exception ex)
         {
-            // If Voronoi generation fails, create minimal vertex data for each cell
-            // This ensures tests can run even with incomplete Voronoi implementation
-            for (int i = 0; i < mapData.Cells.Count; i++)
-            {
-                var cell = mapData.Cells[i];
-                var center = cell.Center;
-                
-                // Create a simple triangle around the cell center as fallback
-                var radius = 2.0;
-                var vertex1 = new Point(center.X + radius, center.Y);
-                var vertex2 = new Point(center.X - radius/2, center.Y + radius * 0.866);
-                var vertex3 = new Point(center.X - radius/2, center.Y - radius * 0.866);
-                
-                // Add vertices to map data if they don't exist
-                var v1Index = mapData.Vertices.Count;
-                var v2Index = v1Index + 1;
-                var v3Index = v1Index + 2;
-                
-                mapData.Vertices.Add(vertex1);
-                mapData.Vertices.Add(vertex2);
-                mapData.Vertices.Add(vertex3);
-                
-                // Assign vertices to cell
-                cell.Vertices.Clear();
-                cell.Vertices.Add(v1Index);
-                cell.Vertices.Add(v2Index);
-                cell.Vertices.Add(v3Index);
-                
-                cell.IsBorder = true; // Mark as border since we don't have real neighbor info
-            }
+            // Do not inject degenerate triangle vertices. Let downstream adapters
+            // synthesize safe polygons (e.g., hex fallback) for rendering when Voronoi fails.
+            // Cells and their centers remain valid for overlays and adapter fallbacks.
+            Console.WriteLine($"ERROR: Voronoi generation failed: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
     }
     

@@ -288,4 +288,37 @@ public static class GeometryUtils
         
         return points;
     }
+
+    /// <summary>
+    /// Generates approximately <paramref name="target"/> points on a jittered uniform grid.
+    /// Provides a dense, stable distribution when Poisson-disk fails or as a fallback.
+    /// </summary>
+    public static List<Point> GenerateUniformGridPoints(double width, double height, int target, IRandomSource? random)
+    {
+        target = Math.Max(1, target);
+        double aspect = width / Math.Max(1.0, height);
+        int nx = Math.Max(1, (int)Math.Round(Math.Sqrt(target * aspect)));
+        int ny = Math.Max(1, (int)Math.Ceiling((double)target / nx));
+
+        double dx = width / nx;
+        double dy = height / ny;
+        double jx = 0.25 * dx; // jitter up to 25%
+        double jy = 0.25 * dy;
+
+        var pts = new List<Point>(nx * ny);
+        for (int iy = 0; iy < ny; iy++)
+        {
+            for (int ix = 0; ix < nx; ix++)
+            {
+                double cx = (ix + 0.5) * dx;
+                double cy = (iy + 0.5) * dy;
+                double ox = random != null ? (random.NextDouble() * 2 - 1) * jx : (global::System.Random.Shared.NextDouble() * 2 - 1) * jx;
+                double oy = random != null ? (random.NextDouble() * 2 - 1) * jy : (global::System.Random.Shared.NextDouble() * 2 - 1) * jy;
+                double x = Math.Clamp(cx + ox, 0, Math.Max(0.0, width - 1e-6));
+                double y = Math.Clamp(cy + oy, 0, Math.Max(0.0, height - 1e-6));
+                pts.Add(new Point(x, y));
+            }
+        }
+        return pts;
+    }
 }
