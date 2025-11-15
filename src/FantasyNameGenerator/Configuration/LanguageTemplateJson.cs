@@ -31,6 +31,12 @@ public class LanguageTemplateJson
 
     [JsonPropertyName("phonotactics")]
     public PhonotacticsJson? Phonotactics { get; set; }
+
+    [JsonPropertyName("morphology")]
+    public MorphologyJson? Morphology { get; set; }
+
+    [JsonPropertyName("grammar")]
+    public GrammarJson? Grammar { get; set; }
 }
 
 /// <summary>
@@ -112,4 +118,46 @@ public class PhonotacticsJson
 
     [JsonPropertyName("enforceSonoritySequencing")]
     public bool? EnforceSonoritySequencing { get; set; }
+}
+
+/// <summary>
+/// JSON representation of morphological rules.
+/// </summary>
+public class MorphologyJson
+{
+    [JsonPropertyName("prefixes")]
+    public List<string>? Prefixes { get; set; }
+
+    [JsonPropertyName("suffixes")]
+    public List<string>? Suffixes { get; set; }
+
+    [JsonPropertyName("compounding")]
+    public CompoundingJson? Compounding { get; set; }
+}
+
+/// <summary>
+/// JSON representation of compounding rules.
+/// </summary>
+public class CompoundingJson
+{
+    [JsonPropertyName("enabled")]
+    public bool Enabled { get; set; }
+
+    [JsonPropertyName("separator")]
+    public string Separator { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// JSON representation of grammatical features.
+/// </summary>
+public class GrammarJson
+{
+    [JsonPropertyName("wordOrder")]
+    public string? WordOrder { get; set; }
+
+    [JsonPropertyName("genderSystem")]
+    public string? GenderSystem { get; set; }
+
+    [JsonPropertyName("numberSystem")]
+    public List<string>? NumberSystem { get; set; }
 }

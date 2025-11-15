@@ -41,6 +41,9 @@ public class MapData
     // Military
     public List<MilitaryUnit> MilitaryUnits { get; set; } = new();
 
+    // Zones
+    public List<Zone> Zones { get; set; } = new();
+
     // Names and labels
     public NamesBase Names { get; set; } = new();
 

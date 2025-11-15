@@ -50,6 +50,11 @@ public class Culture
     public int NameBaseId { get; set; }
     
     /// <summary>
+    /// Name generator for this culture (generates names for burgs, states, etc.)
+    /// </summary>
+    public FantasyNameGenerator.NameGenerator? NameGenerator { get; set; }
+    
+    /// <summary>
     /// Heraldic shield shape (heater, wedged, round, etc.)
     /// </summary>
     public string Shield { get; set; } = "heater";

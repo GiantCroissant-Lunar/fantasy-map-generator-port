@@ -1,0 +1,195 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://fantasy-map-generator.net/schemas/language-template.json",
+  "title": "Language Template",
+  "description": "Schema for fantasy language phonology and phonotactics templates",
+  "type": "object",
+  "required": ["name", "phonology"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the language template",
+      "minLength": 1,
+      "examples": ["Germanic", "Elvish", "Dwarvish"]
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of the language template"
+    },
+    "phonology": {
+      "type": "object",
+      "description": "The phonological inventory of the language",
+      "required": ["consonants", "vowels"],
+      "properties": {
+        "consonants": {
+          "type": "array",
+          "description": "List of consonant phonemes",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "examples": [["p", "t", "k", "s", "m", "n"]]
+        },
+        "vowels": {
+          "type": "array",
+          "description": "List of vowel phonemes",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "examples": [["a", "e", "i", "o", "u"]]
+        },
+        "sonorants": {
+          "type": "array",
+          "description": "List of sonorant consonants (liquids, nasals, glides)",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "examples": [["l", "r", "m", "n", "w", "j"]]
+        },
+        "sibilants": {
+          "type": "array",
+          "description": "List of sibilant consonants",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "examples": [["s", "z", "ʃ", "ʒ"]]
+        }
+      }
+    },
+    "phonotactics": {
+      "type": "object",
+      "description": "The phonotactic constraints of the language",
+      "properties": {
+        "structures": {
+          "type": "array",
+          "description": "Allowed syllable structures (C=consonant, V=vowel)",
+          "items": {
+            "type": "string",
+            "pattern": "^[CV]+$"
+          },
+          "examples": [["CV", "CVC", "CCVC"]]
+        },
+        "forbiddenSequences": {
+          "type": "array",
+          "description": "Phoneme sequences that are not allowed",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["θθ", "ŋŋ", "ðð"]]
+        },
+        "maxConsonantCluster": {
+          "type": "integer",
+          "description": "Maximum number of consecutive consonants allowed",
+          "minimum": 0,
+          "maximum": 5,
+          "default": 2
+        },
+        "minSyllables": {
+          "type": "integer",
+          "description": "Minimum number of syllables in generated words",
+          "minimum": 1,
+          "default": 1
+        },
+        "maxSyllables": {
+          "type": "integer",
+          "description": "Maximum number of syllables in generated words",
+          "minimum": 1,
+          "default": 4
+        }
+      }
+    },
+    "morphology": {
+      "type": "object",
+      "description": "Morphological rules for the language",
+      "properties": {
+        "prefixes": {
+          "type": "array",
+          "description": "Common prefixes",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["un-", "re-", "pre-"]]
+        },
+        "suffixes": {
+          "type": "array",
+          "description": "Common suffixes",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["-ed", "-ing", "-er"]]
+        },
+        "compounding": {
+          "type": "object",
+          "description": "Rules for compound words",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "separator": {
+              "type": "string",
+              "description": "Character(s) used to join compound words",
+              "examples": ["", "-", " "]
+            }
+          }
+        }
+      }
+    },
+    "grammar": {
+      "type": "object",
+      "description": "Grammatical features of the language",
+      "properties": {
+        "wordOrder": {
+          "type": "string",
+          "description": "Basic word order pattern",
+          "enum": ["SOV", "SVO", "VSO", "VOS", "OVS", "OSV"],
+          "default": "SVO"
+        },
+        "genderSystem": {
+          "type": "string",
+          "description": "Grammatical gender system",
+          "enum": ["none", "natural", "two-gender", "three-gender"],
+          "default": "none"
+        },
+        "numberSystem": {
+          "type": "array",
+          "description": "Number distinctions made",
+          "items": {
+            "type": "string",
+            "enum": ["singular", "dual", "plural"]
+          },
+          "default": ["singular", "plural"]
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata about the template",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Template version",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "examples": ["1.0.0"]
+        },
+        "author": {
+          "type": "string",
+          "description": "Template author"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags for categorizing the template",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["fantasy", "germanic", "medieval"]]
+        }
+      }
+    }
+  }
+}

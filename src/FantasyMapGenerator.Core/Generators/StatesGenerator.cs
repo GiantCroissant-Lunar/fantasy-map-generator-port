@@ -76,8 +76,8 @@ public class StatesGenerator
             // Calculate expansionism
             double expansionism = _random.NextDouble() * _settings.SizeVariety + 1.0;
 
-            // Generate state name (simplified for now)
-            string stateName = capital.Name;
+            // Generate state name using culture's name generator
+            string stateName = GenerateStateName(capital);
 
             var state = new State
             {
@@ -600,6 +600,33 @@ public class StatesGenerator
             // Generate full name
             state.FullName = $"{state.Form} of {state.Name}";
         }
+    }
+
+    /// <summary>
+    /// Generate a state name using the culture's name generator
+    /// </summary>
+    private string GenerateStateName(Burg capital)
+    {
+        // Get culture for the capital
+        var cell = _map.Cells[capital.CellId];
+        var culture = _map.Cultures?.FirstOrDefault(c => c.Id == cell.Culture);
+        
+        // Use culture's name generator if available
+        if (culture?.NameGenerator != null)
+        {
+            try
+            {
+                return culture.NameGenerator.Generate(FantasyNameGenerator.NameTypes.NameType.State);
+            }
+            catch
+            {
+                // Fallback to capital name if generation fails
+                return capital.Name;
+            }
+        }
+        
+        // Fallback to capital name
+        return capital.Name;
     }
 
     /// <summary>

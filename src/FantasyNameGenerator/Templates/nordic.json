@@ -1,32 +1,32 @@
 {
-  "name": "Germanic",
-  "description": "Germanic-inspired phonology (English, German, Norse). Hard consonants, consonant clusters, diphthongs.",
+  "name": "Nordic",
+  "description": "Old Norse-inspired phonology. Runic feel, consonant clusters, distinctive vowels with length distinctions.",
   "version": "1.0",
   "inventory": {
     "consonants": "ptkbdgmnlrsʃfvθð",
-    "vowels": "aeiouæɑɪʊ",
+    "vowels": "aiueoəøyæ",
     "liquids": "lrw",
     "nasals": "mnŋ",
     "fricatives": "fvszʃθð",
     "stops": "ptkbdg",
     "sibilants": "sʃz",
-    "finals": "mnstŋ"
+    "finals": "mnstrlŋ"
   },
   "orthography": {
     "ʃ": "sh",
     "θ": "th",
-    "ð": "th",
+    "ð": "dh",
     "æ": "ae",
-    "ɑ": "a",
-    "ɪ": "i",
-    "ʊ": "u",
+    "ø": "o",
+    "y": "y",
+    "ə": "e",
     "ŋ": "ng"
   },
   "phonotactics": {
     "structures": ["CVC", "CCVC", "CVCC", "CV"],
-    "forbiddenSequences": ["θθ", "ðð", "ʃʃ", "nm", "ŋm", "ŋn"],
-    "allowedOnsets": ["pl", "pr", "tr", "kr", "kl", "br", "bl", "dr", "gr", "gl", "fr", "fl", "θr", "ʃr", "st", "sp", "sk"],
-    "allowedCodas": ["st", "nt", "nd", "mp", "ŋk", "lt", "rt", "ft"],
+    "forbiddenSequences": ["θθ", "ðð", "ʃʃ", "nm"],
+    "allowedOnsets": ["pl", "pr", "tr", "kr", "kl", "br", "bl", "dr", "gr", "gl", "fr", "fl", "θr", "st", "sp", "sk", "sn", "sl"],
+    "allowedCodas": ["st", "nt", "nd", "mp", "nk", "lt", "rt", "ft", "ng"],
     "maxConsonantCluster": 3,
     "maxVowelCluster": 2,
     "minSyllables": 1,
@@ -34,8 +34,8 @@
     "enforceSonoritySequencing": true
   },
   "morphology": {
-    "prefixes": ["ge-", "be-", "un-", "for-"],
-    "suffixes": ["-en", "-er", "-ing", "-ung", "-heit", "-keit", "-lich"],
+    "prefixes": ["a-", "for-", "of-"],
+    "suffixes": ["-son", "-dottir", "-sen", "-sson", "-ing", "-ulf", "-bjorn"],
     "compounding": {
       "enabled": true,
       "separator": ""

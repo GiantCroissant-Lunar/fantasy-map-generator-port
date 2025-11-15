@@ -44,7 +44,26 @@ public class CulturesGenerator
         CollectStatistics(cultures);
         Console.WriteLine("Collected statistics");
 
+        // Initialize name generators for each culture
+        InitializeNameGenerators(cultures);
+        Console.WriteLine("Initialized name generators");
+
         return cultures;
+    }
+
+    /// <summary>
+    /// Initialize name generators for all cultures
+    /// </summary>
+    private void InitializeNameGenerators(List<Culture> cultures)
+    {
+        foreach (var culture in cultures.Where(c => !c.IsRemoved && c.Id > 0))
+        {
+            // Create a deterministic random for this culture
+            var cultureRandom = new System.Random(_random.Next());
+            
+            // Create name generator using factory
+            culture.NameGenerator = Naming.NameGeneratorFactory.CreateForCulture(culture, cultureRandom);
+        }
     }
 
     /// <summary>

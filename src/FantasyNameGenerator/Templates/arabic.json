@@ -1,0 +1,50 @@
+{
+  "name": "Arabic",
+  "description": "Arabic-inspired phonology. Emphatic consonants, pharyngeals, trilateral root system.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "btkdqʔsʃzxɣfθðħʕhmnlrwj",
+    "vowels": "aiuː",
+    "liquids": "lrw",
+    "nasals": "mn",
+    "fricatives": "fsʃzxɣθðħʕh",
+    "stops": "btkdqʔ",
+    "sibilants": "sʃz",
+    "finals": "mnlr"
+  },
+  "orthography": {
+    "ʔ": "'",
+    "ʃ": "sh",
+    "θ": "th",
+    "ð": "dh",
+    "ħ": "h",
+    "ʕ": "'",
+    "ɣ": "gh",
+    "x": "kh",
+    "ː": ""
+  },
+  "phonotactics": {
+    "structures": ["CVC", "CVCC", "CV", "CCVC"],
+    "forbiddenSequences": ["ʔʔ", "ʕʕ", "ħħ"],
+    "allowedOnsets": ["b", "t", "k", "d", "q", "s", "sh", "z", "kh", "gh", "f", "th", "dh", "h", "m", "n", "l", "r", "w", "j"],
+    "allowedCodas": ["m", "n", "l", "r", "b", "t", "d"],
+    "maxConsonantCluster": 2,
+    "maxVowelCluster": 1,
+    "minSyllables": 2,
+    "maxSyllables": 3,
+    "enforceSonoritySequencing": true
+  },
+  "morphology": {
+    "prefixes": ["al-", "wa-", "bi-"],
+    "suffixes": ["-a", "-i", "-u", "-un", "-in", "-an"],
+    "compounding": {
+      "enabled": true,
+      "separator": ""
+    }
+  },
+  "grammar": {
+    "wordOrder": "VSO",
+    "genderSystem": "two-gender",
+    "numberSystem": ["singular", "dual", "plural"]
+  }
+}

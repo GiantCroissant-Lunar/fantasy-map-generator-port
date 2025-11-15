@@ -1,0 +1,34 @@
+feat(namegen): Add Phase 2 - Grammar Engine & Name Types API
+
+Implemented the grammar and high-level name generation layers:
+
+**Layer 5: Grammar Engine**
+- RulePack: RimWorld-style rule expansion with [tag] syntax
+- GrammarEngine: Combines static templates with dynamic generators
+- Supports recursive rule expansion with depth limiting
+- Deterministic with seed support
+
+**Layer 6: Name Types API**
+- NameGenerator: High-level API for all name types
+- NameType enum: Burg, State, Province, Religion, Culture, Person, River, Mountain, Region, Forest, Lake
+- NameTypeTemplates: Predefined grammar templates for each type
+- Variety in name generation (simple, compound, affixed patterns)
+
+**Features:**
+- Template-based name generation with grammar rules
+- Dynamic rule generators for syllables, words, affixes
+- Unique name tracking to avoid duplicates
+- Customizable templates per name type
+- Full integration with Phase 1 layers (syllables, phonology, phonotactics, morphology)
+
+**Test Coverage:**
+- RulePackTests: 11 tests for rule expansion
+- GrammarEngineTests: 13 tests for grammar engine
+- NameGeneratorTests: 18 tests for high-level API
+- NameTypeTemplatesTests: 11 tests for templates
+
+**Total Phase 2 Tests:** 53 tests
+
+**Phase 1 + 2 Combined:** 164 tests passing ✓
+
+The name generation system is now complete with all 6 layers functional!

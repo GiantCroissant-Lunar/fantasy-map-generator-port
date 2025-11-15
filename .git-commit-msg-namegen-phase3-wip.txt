@@ -1,0 +1,38 @@
+WIP: feat(namegen): Phase 3 - Integration with Map Generators
+
+Started integration of the name generation system with map generators:
+
+**Completed:**
+- Added FantasyNameGenerator project reference to Core
+- Created NameGeneratorFactory for culture-specific name generators
+- Added NameGenerator property to Culture model
+- Updated CulturesGenerator to initialize name generators
+- Updated BurgsGenerator to use culture name generators
+- Updated StatesGenerator to use culture name generators
+
+**Remaining Issues to Fix:**
+1. Culture.Type is CultureType enum, not string - need to map enum to template names
+2. Phonology template methods signature mismatch - they don't take Random parameter
+3. Need to update NameGeneratorFactory to work with actual API
+
+**Next Steps:**
+- Fix NameGeneratorFactory to use correct Culture.Type enum
+- Fix phonology template method calls
+- Test integration end-to-end
+- Add integration tests
+- Update other generators (Provinces, Religions, etc.)
+
+**Architecture:**
+```
+MapGenerators (Core)
+    ↓
+CulturesGenerator
+    ↓
+NameGeneratorFactory
+    ↓
+NameGenerator (FantasyNameGenerator)
+    ↓
+Phonology + Phonotactics + Morphology + Grammar
+```
+
+Phase 3 will complete the full integration, allowing all map entities to have realistic, culturally-appropriate names!

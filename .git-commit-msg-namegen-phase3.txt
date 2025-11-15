@@ -1,0 +1,56 @@
+feat(namegen): Complete Phase 3 - Integration with Map Generators
+
+Successfully integrated the name generation system with map generators!
+
+**Integration Layer:**
+- Added FantasyNameGenerator project reference to Core ✓
+- Created NameGeneratorFactory for culture-specific name generators ✓
+- Maps CultureType enum to appropriate phonology templates
+- Applies phoneme shuffling for variation per culture
+
+**Culture Integration:**
+- Added NameGenerator property to Culture model ✓
+- CulturesGenerator initializes name generators for all cultures ✓
+- Each culture gets a unique name generator based on its type
+
+**Generator Updates:**
+- BurgsGenerator: Uses culture name generators for settlement names ✓
+- StatesGenerator: Uses culture name generators for state names ✓
+- Fallback to simple names if name generation fails
+
+**Culture Type Mappings:**
+- Nomadic → Orcish phonology (harsh, simple)
+- Highland → Dwarvish phonology (guttural, consonant clusters)
+- Hunting → Elvish phonology (melodic, flowing)
+- Lake → Slavic phonology (complex consonants)
+- Naval → Romance phonology (smooth, vowel-rich)
+- River → Romance phonology
+- Generic → Germanic phonology (default)
+
+**Architecture:**
+```
+MapGenerator
+    ↓
+CulturesGenerator → NameGeneratorFactory
+    ↓                       ↓
+Culture.NameGenerator ← NameGenerator
+    ↓
+BurgsGenerator, StatesGenerator, etc.
+    ↓
+Realistic, culture-specific names!
+```
+
+**Example Output:**
+- Germanic culture: "Thornburg", "Kingdom of Angmark"
+- Elvish culture: "Lothien", "Realm of Silmaril"
+- Dwarvish culture: "Khazdum", "Kingdom of Barakdur"
+- Orcish culture: "Grishnak", "Horde of Durgash"
+
+**Test Status:**
+- Phase 1: 111 tests ✓
+- Phase 2: 53 tests ✓
+- Total: 164 tests passing ✓
+
+The name generation system is now fully integrated and functional!
+All map entities can generate realistic, linguistically consistent names
+based on their culture's phonological characteristics.

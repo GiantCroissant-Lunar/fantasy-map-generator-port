@@ -1,33 +1,416 @@
 # Spec 014: Advanced Name Generation System
 
 ## Status
-- **State:** Not Started
+- **State:** In Progress
 - **Priority:** ⭐⭐⭐⭐ Important
 - **Estimated Effort:** 2 weeks
-- **Dependencies:** Cultures (008)
+- **Dependencies:** None (standalone library)
 - **Blocks:** None (enhances existing features)
+- **Project:** `FantasyNameGenerator` (separate library)
 
 ## Overview
 
-Implement an advanced linguistic name generation system that creates culturally-appropriate names for places, people, and features. The system uses phoneme-based language generation with morphemes, syllable structures, and orthographic rules to create realistic-sounding names.
+Implement an advanced linguistic name generation system as a **standalone reusable library** that creates culturally-appropriate names for places, people, and features. The system uses phoneme-based language generation with morphemes, syllable structures, and orthographic rules to create realistic-sounding names.
+
+**Key Design Decisions:**
+- ✅ **Unique Language per Culture** - Each culture gets its own language variant (mutated from templates)
+- ✅ **Full Orthography/Spelling Rules** - Readable names with consistent spelling conventions
+- ✅ **Fantasy Language Support** - Built-in Elvish, Dwarvish, Orcish alongside real-world inspired languages
+- ✅ **JSON-Based Extensibility** - Easy to add new language templates via JSON files
+- ✅ **Standalone Library** - Separate `FantasyNameGenerator` project for reusability
+
+## Architecture Layers
+
+The system follows a layered architecture inspired by conlang (constructed language) theory and RimWorld's RulePacks:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ NameTypes (burg, state, river, religion, culture, army)│  ← High-level API
+├─────────────────────────────────────────────────────────┤
+│ GrammarEngine (RimWorld RulePacks concept)              │  ← Grammar rules
+├─────────────────────────────────────────────────────────┤
+│ MorphologyRules (morphemes, word formation)             │  ← Word building
+├─────────────────────────────────────────────────────────┤
+│ PhonotacticRules (conlang-namegen concepts)             │  ← Sound patterns
+├─────────────────────────────────────────────────────────┤
+│ CulturePhonology (libconlang inspired)                  │  ← Phoneme inventory
+├─────────────────────────────────────────────────────────┤
+│ SyllableGenerator (base layer)                          │  ← Core generation
+└─────────────────────────────────────────────────────────┘
+```
+
+**Layer Responsibilities:**
+
+1. **SyllableGenerator** - Core syllable construction from phonemes
+2. **CulturePhonology** - Phoneme inventory and sound system per culture (libconlang concepts)
+3. **PhonotacticRules** - Legal sound combinations and constraints (conlang-namegen)
+4. **MorphologyRules** - Morpheme tracking and word formation rules
+5. **GrammarEngine** - Grammatical constructions (compounds, genitives, etc.) inspired by RimWorld RulePacks
+6. **NameTypes** - High-level API for specific name types (burg, state, river, religion, culture, army)
 
 ## Goals
 
-1. **Language Generation** - Create procedural languages with phonetic rules
-2. **Phoneme Systems** - Define consonants, vowels, and special sounds
-3. **Syllable Structures** - Control how syllables are formed
-4. **Morpheme Tracking** - Semantic meaning in word parts
-5. **Orthographic Rules** - Spelling conventions
-6. **Name Generation** - Generate names for burgs, states, features, people
+1. **Language Templates** - Define base languages (Germanic, Romance, Elvish, Dwarvish, etc.)
+2. **Language Mutation** - Create unique variants per culture from templates
+3. **Phoneme Systems** - Define consonants, vowels, and special sounds
+4. **Syllable Structures** - Control how syllables are formed
+5. **Morpheme Tracking** - Semantic meaning in word parts
+6. **Orthographic Rules** - Spelling conventions for readability
+7. **Name Generation** - Generate names for burgs, states, features, people
+8. **JSON Configuration** - Load language templates from JSON files
 
 ## Reference Implementation
 
 **Source:** `ref-projects/FantasyMapGenerator/Language/LanguageGenerator.cs`
 
+## Layer 1: SyllableGenerator
+
+**Purpose:** Core syllable construction from phoneme patterns
+
+```csharp
+namespace FantasyNameGenerator.Core;
+
+public class SyllableGenerator
+{
+    private readonly Random _random;
+    
+    public string GenerateSyllable(string pattern, Dictionary<char, string> phonemeMap)
+    {
+        var syllable = new StringBuilder();
+        
+        foreach (char symbol in pattern)
+        {
+            if (symbol == '?') continue; // Optional marker
+            
+            if (phonemeMap.TryGetValue(symbol, out string? phonemes))
+            {
+                int index = _random.Next(phonemes.Length);
+                syllable.Append(phonemes[index]);
+            }
+        }
+        
+        return syllable.ToString();
+    }
+}
+```
+
+## Layer 2: CulturePhonology (libconlang)
+
+**Purpose:** Define phoneme inventory and sound system per culture
+
+```csharp
+namespace FantasyNameGenerator.Phonology;
+
+public class CulturePhonology
+{
+    public string Name { get; set; } = string.Empty;
+    
+    // Phoneme inventory (IPA symbols)
+    public PhonemeInventory Inventory { get; set; } = new();
+    
+    // Phoneme frequency weights
+    public Dictionary<char, double> Weights { get; set; } = new();
+    
+    // Allophonic rules (contextual sound changes)
+    public List<AllophoneRule> Allophones { get; set; } = new();
+}
+
+public class PhonemeInventory
+{
+    public string Consonants { get; set; } = string.Empty;
+    public string Vowels { get; set; } = string.Empty;
+    public string Liquids { get; set; } = string.Empty;
+    public string Nasals { get; set; } = string.Empty;
+    public string Fricatives { get; set; } = string.Empty;
+    public string Stops { get; set; } = string.Empty;
+}
+
+public class AllophoneRule
+{
+    public char Phoneme { get; set; }
+    public char Allophone { get; set; }
+    public string Context { get; set; } = string.Empty; // Regex pattern
+}
+```
+
+## Layer 3: PhonotacticRules (conlang-namegen)
+
+**Purpose:** Define legal sound combinations and phonotactic constraints
+
+```csharp
+namespace FantasyNameGenerator.Phonotactics;
+
+public class PhonotacticRules
+{
+    // Syllable structure patterns (e.g., "CVC", "CV", "CCVC")
+    public List<string> AllowedStructures { get; set; } = new();
+    
+    // Forbidden phoneme sequences (regex patterns)
+    public List<string> ForbiddenSequences { get; set; } = new();
+    
+    // Onset constraints (syllable-initial)
+    public List<string> AllowedOnsets { get; set; } = new();
+    
+    // Coda constraints (syllable-final)
+    public List<string> AllowedCodas { get; set; } = new();
+    
+    // Cluster constraints
+    public int MaxConsonantCluster { get; set; } = 2;
+    public int MaxVowelCluster { get; set; } = 2;
+    
+    // Sonority sequencing
+    public bool EnforceSonoritySequencing { get; set; } = true;
+    
+    public bool IsValidSyllable(string syllable)
+    {
+        // Check against forbidden sequences
+        foreach (var forbidden in ForbiddenSequences)
+        {
+            if (Regex.IsMatch(syllable, forbidden, RegexOptions.IgnoreCase))
+                return false;
+        }
+        
+        // Check cluster constraints
+        // Check sonority sequencing
+        // etc.
+        
+        return true;
+    }
+}
+```
+
+## Layer 4: MorphologyRules
+
+**Purpose:** Morpheme tracking and word formation rules
+
+```csharp
+namespace FantasyNameGenerator.Morphology;
+
+public class MorphologyRules
+{
+    // Morpheme database (semantic -> phonetic forms)
+    public Dictionary<string, List<string>> Morphemes { get; set; } = new();
+    
+    // Derivational affixes
+    public List<Affix> Prefixes { get; set; } = new();
+    public List<Affix> Suffixes { get; set; } = new();
+    public List<Affix> Infixes { get; set; } = new();
+    
+    // Compounding rules
+    public CompoundingRules Compounding { get; set; } = new();
+    
+    // Morphophonemic rules (sound changes at morpheme boundaries)
+    public List<MorphophonemicRule> MorphophonemicRules { get; set; } = new();
+    
+    public string GetOrCreateMorpheme(string semanticKey, SyllableGenerator generator)
+    {
+        if (!Morphemes.ContainsKey(semanticKey))
+            Morphemes[semanticKey] = new List<string>();
+        
+        var list = Morphemes[semanticKey];
+        
+        // Return existing or generate new
+        if (list.Count > 0 && _random.NextDouble() < 0.7)
+            return list[_random.Next(list.Count)];
+        
+        var newMorpheme = generator.GenerateSyllable(/* ... */);
+        list.Add(newMorpheme);
+        return newMorpheme;
+    }
+}
+
+public class Affix
+{
+    public string Form { get; set; } = string.Empty;
+    public string Meaning { get; set; } = string.Empty;
+    public double Frequency { get; set; } = 0.1;
+}
+
+public class CompoundingRules
+{
+    public string Joiner { get; set; } = " ";
+    public bool HeadFirst { get; set; } = true; // Head-initial vs head-final
+    public double CompoundProbability { get; set; } = 0.3;
+}
+
+public class MorphophonemicRule
+{
+    public string Pattern { get; set; } = string.Empty; // Regex
+    public string Replacement { get; set; } = string.Empty;
+    public string Context { get; set; } = string.Empty; // Where it applies
+}
+```
+
+## Layer 5: GrammarEngine (RimWorld RulePacks)
+
+**Purpose:** Grammatical constructions and name templates
+
+```csharp
+namespace FantasyNameGenerator.Grammar;
+
+public class GrammarEngine
+{
+    private readonly MorphologyRules _morphology;
+    
+    // Grammar rules (inspired by RimWorld RulePacks)
+    public Dictionary<string, List<GrammarRule>> RulePacks { get; set; } = new();
+    
+    public string ApplyGrammarRule(string ruleKey, Dictionary<string, string> context)
+    {
+        if (!RulePacks.TryGetValue(ruleKey, out var rules))
+            return string.Empty;
+        
+        var rule = rules[_random.Next(rules.Count)];
+        return rule.Apply(context, this);
+    }
+}
+
+public class GrammarRule
+{
+    public string Pattern { get; set; } = string.Empty;
+    public double Weight { get; set; } = 1.0;
+    
+    // Pattern examples:
+    // "[word]" - simple word
+    // "[word] [word]" - compound
+    // "[word] [genitive] [word]" - genitive construction
+    // "[definite] [word]" - with article
+    // "[prefix][word]" - with affix
+    
+    public string Apply(Dictionary<string, string> context, GrammarEngine engine)
+    {
+        var result = Pattern;
+        
+        // Replace placeholders with actual words/morphemes
+        var matches = Regex.Matches(Pattern, @"\[(\w+)\]");
+        foreach (Match match in matches)
+        {
+            string key = match.Groups[1].Value;
+            if (context.TryGetValue(key, out string? value))
+            {
+                result = result.Replace(match.Value, value);
+            }
+        }
+        
+        return result;
+    }
+}
+
+// Example RulePacks
+public static class DefaultRulePacks
+{
+    public static Dictionary<string, List<GrammarRule>> GetBurgRules()
+    {
+        return new()
+        {
+            ["simple"] = new()
+            {
+                new GrammarRule { Pattern = "[word]", Weight = 0.5 },
+                new GrammarRule { Pattern = "[word][suffix]", Weight = 0.3 },
+            },
+            ["compound"] = new()
+            {
+                new GrammarRule { Pattern = "[word1][joiner][word2]", Weight = 0.4 },
+                new GrammarRule { Pattern = "[word1][genitive][word2]", Weight = 0.3 },
+            },
+            ["descriptive"] = new()
+            {
+                new GrammarRule { Pattern = "[adjective][joiner][word]", Weight = 0.5 },
+                new GrammarRule { Pattern = "[definite][joiner][word]", Weight = 0.1 },
+            }
+        };
+    }
+}
+```
+
+## Layer 6: NameTypes (High-Level API)
+
+**Purpose:** Specific name generation for different entity types
+
+```csharp
+namespace FantasyNameGenerator.API;
+
+public class NameGenerator
+{
+    private readonly GrammarEngine _grammar;
+    private readonly MorphologyRules _morphology;
+    private readonly PhonotacticRules _phonotactics;
+    private readonly CulturePhonology _phonology;
+    
+    // High-level API for each name type
+    public string GenerateBurgName(NameContext context)
+    {
+        var semanticKeys = new[] { "settlement", "town", "city", "fort" };
+        return GenerateName("burg", semanticKeys, context);
+    }
+    
+    public string GenerateStateName(NameContext context)
+    {
+        var semanticKeys = new[] { "kingdom", "empire", "realm", "land" };
+        return GenerateName("state", semanticKeys, context);
+    }
+    
+    public string GenerateRiverName(NameContext context)
+    {
+        var semanticKeys = new[] { "river", "water", "flow", "stream" };
+        return GenerateName("river", semanticKeys, context);
+    }
+    
+    public string GenerateReligionName(NameContext context)
+    {
+        var semanticKeys = new[] { "god", "faith", "divine", "holy" };
+        return GenerateName("religion", semanticKeys, context);
+    }
+    
+    public string GenerateCultureName(NameContext context)
+    {
+        var semanticKeys = new[] { "people", "folk", "tribe", "clan" };
+        return GenerateName("culture", semanticKeys, context);
+    }
+    
+    public string GenerateArmyName(NameContext context)
+    {
+        var semanticKeys = new[] { "army", "legion", "host", "guard" };
+        return GenerateName("army", semanticKeys, context);
+    }
+    
+    private string GenerateName(string nameType, string[] semanticKeys, NameContext context)
+    {
+        // Select appropriate grammar rule pack
+        var ruleKey = SelectRuleKey(nameType, context);
+        
+        // Build context with morphemes
+        var grammarContext = new Dictionary<string, string>();
+        foreach (var key in semanticKeys)
+        {
+            grammarContext[key] = _morphology.GetOrCreateMorpheme(key, /* ... */);
+        }
+        
+        // Apply grammar rules
+        var name = _grammar.ApplyGrammarRule(ruleKey, grammarContext);
+        
+        // Apply orthography
+        name = ApplyOrthography(name);
+        
+        // Capitalize
+        name = Capitalize(name);
+        
+        return name;
+    }
+}
+
+public class NameContext
+{
+    public int Seed { get; set; }
+    public string? CultureId { get; set; }
+    public Dictionary<string, object> Metadata { get; set; } = new();
+}
+```
+
 ## Data Models
 
 ```csharp
-namespace FantasyMapGenerator.Core.Models;
+namespace FantasyNameGenerator.Models;
 
 public class Language
 {
@@ -431,60 +814,174 @@ public static class PhonemeSets
 
 ## Implementation Steps
 
-### Step 1: Models (Day 1-2)
-- [ ] Create `Language.cs` model
-- [ ] Create phoneme set constants
-- [ ] Create orthography mappings
+### Phase 1: Foundation Layers (Days 1-4)
 
-### Step 2: Core Generation (Day 3-5)
-- [ ] Create `LanguageGenerator.cs`
-- [ ] Implement `GenerateRandomLanguage()`
-- [ ] Implement `GenerateSyllable()`
-- [ ] Implement `ApplyOrthography()`
-
-### Step 3: Morphemes & Words (Day 6-7)
-- [ ] Implement `GetMorpheme()`
-- [ ] Implement `GenerateWord()`
-- [ ] Implement word tracking
-
-### Step 4: Name Generation (Day 8-9)
-- [ ] Implement `GenerateName()`
-- [ ] Implement `GetWord()`
-- [ ] Implement compound names
-- [ ] Implement genitive constructions
-
-### Step 5: Integration (Day 10-11)
-- [ ] Integrate with Cultures
-- [ ] Integrate with Burgs
-- [ ] Integrate with States
-- [ ] Integrate with Features
-
-### Step 6: Testing (Day 12-13)
+#### Step 1: Layer 1 - SyllableGenerator (Day 1)
+- [ ] Create `SyllableGenerator.cs`
+- [ ] Implement basic syllable construction
+- [ ] Add pattern parsing (C, V, L, S, F, ?)
 - [ ] Unit tests for syllable generation
-- [ ] Unit tests for name generation
-- [ ] Integration tests
-- [ ] Quality tests (no duplicates, etc.)
 
-### Step 7: Documentation (Day 14)
-- [ ] Update README
-- [ ] Add usage examples
-- [ ] Document phoneme systems
+#### Step 2: Layer 2 - CulturePhonology (Day 2)
+- [ ] Create `CulturePhonology.cs` and `PhonemeInventory.cs`
+- [ ] Implement phoneme inventory system
+- [ ] Add phoneme frequency weights
+- [ ] Create allophone rules
+- [ ] Unit tests for phonology
+
+#### Step 3: Layer 3 - PhonotacticRules (Day 3)
+- [ ] Create `PhonotacticRules.cs`
+- [ ] Implement syllable structure validation
+- [ ] Add forbidden sequence checking
+- [ ] Implement onset/coda constraints
+- [ ] Add sonority sequencing
+- [ ] Unit tests for phonotactics
+
+#### Step 4: Layer 4 - MorphologyRules (Day 4)
+- [ ] Create `MorphologyRules.cs`
+- [ ] Implement morpheme database
+- [ ] Add affix system (prefix/suffix/infix)
+- [ ] Implement compounding rules
+- [ ] Add morphophonemic rules
+- [ ] Unit tests for morphology
+
+### Phase 2: Grammar & API (Days 5-7)
+
+#### Step 5: Layer 5 - GrammarEngine (Day 5-6)
+- [ ] Create `GrammarEngine.cs` and `GrammarRule.cs`
+- [ ] Implement RulePack system
+- [ ] Add pattern matching and replacement
+- [ ] Create default RulePacks for each name type
+- [ ] Unit tests for grammar engine
+
+#### Step 6: Layer 6 - NameTypes API (Day 7)
+- [ ] Create `NameGenerator.cs` (high-level API)
+- [ ] Implement `GenerateBurgName()`
+- [ ] Implement `GenerateStateName()`
+- [ ] Implement `GenerateRiverName()`
+- [ ] Implement `GenerateReligionName()`
+- [ ] Implement `GenerateCultureName()`
+- [ ] Implement `GenerateArmyName()`
+- [ ] Unit tests for each name type
+
+### Phase 3: Language Templates (Days 8-10)
+
+#### Step 7: JSON Language System (Day 8)
+- [ ] Create JSON schema for language templates
+- [ ] Implement JSON loader
+- [ ] Add language mutation system
+- [ ] Unit tests for JSON loading
+
+#### Step 8: Built-in Language Templates (Day 9-10)
+- [ ] Create `germanic.json`
+- [ ] Create `romance.json`
+- [ ] Create `slavic.json`
+- [ ] Create `elvish.json` (fantasy)
+- [ ] Create `dwarvish.json` (fantasy)
+- [ ] Create `orcish.json` (fantasy)
+- [ ] Integration tests for all templates
+
+### Phase 4: Integration & Polish (Days 11-14)
+
+#### Step 9: Orthography System (Day 11)
+- [ ] Implement orthography rules
+- [ ] Add spelling conventions
+- [ ] Create readable output
+- [ ] Unit tests for orthography
+
+#### Step 10: Quality Assurance (Day 12)
+- [ ] Implement duplicate detection
+- [ ] Add name length constraints
+- [ ] Add pronounceability scoring
+- [ ] Performance optimization
+
+#### Step 11: Integration with Map Generator (Day 13)
+- [ ] Add project reference to `FantasyMapGenerator.Core`
+- [ ] Integrate with `CulturesGenerator`
+- [ ] Integrate with `BurgsGenerator`
+- [ ] Integrate with `StatesGenerator`
+- [ ] Integration tests
+
+#### Step 12: Documentation (Day 14)
+- [ ] Update README with examples
+- [ ] Document each layer
+- [ ] Add usage guide
+- [ ] Create language template guide
+
+## Language Templates
+
+Language templates are defined in JSON files under `Data/Languages/`:
+
+```json
+{
+  "name": "elvish",
+  "description": "Flowing, melodic language inspired by Tolkien",
+  "phonemes": {
+    "C": "lmnrwyfθð",
+    "V": "aeiouəɛ",
+    "L": "lrwy",
+    "S": "sʃ",
+    "F": "nml"
+  },
+  "structures": ["CV", "CVC", "V"],
+  "restricts": ["θθ", "ðð", "ww"],
+  "consonantOrthography": {
+    "θ": "th",
+    "ð": "dh",
+    "ʃ": "sh"
+  },
+  "vowelOrthography": {
+    "ə": "e",
+    "ɛ": "e"
+  },
+  "minSyllables": 2,
+  "maxSyllables": 4,
+  "joiner": " ",
+  "exponent": 2
+}
+```
+
+**Built-in Templates:**
+- `germanic.json` - Hard consonants, compound words
+- `romance.json` - Flowing vowels, Latin-inspired
+- `slavic.json` - Consonant clusters, palatalization
+- `elvish.json` - Melodic, flowing (fantasy)
+- `dwarvish.json` - Harsh, guttural (fantasy)
+- `orcish.json` - Simple, brutal (fantasy)
+
+## Language Mutation
+
+Each culture gets a **unique language variant** mutated from a template:
+
+```csharp
+public Language MutateLanguage(Language template, int seed)
+{
+    var rng = new Random(seed);
+    var mutated = template.Clone();
+    
+    // Shuffle phoneme order (changes frequency)
+    mutated.Phonemes["C"] = Shuffle(mutated.Phonemes["C"], rng);
+    mutated.Phonemes["V"] = Shuffle(mutated.Phonemes["V"], rng);
+    
+    // Randomly adjust syllable counts
+    mutated.MinSyllables += rng.Next(-1, 2);
+    mutated.MaxSyllables += rng.Next(-1, 2);
+    
+    // Randomly change structure preference
+    if (rng.NextDouble() < 0.3)
+    {
+        mutated.Structure = mutated.Structures[rng.Next(mutated.Structures.Length)];
+    }
+    
+    return mutated;
+}
+```
 
 ## Configuration
 
 ```csharp
-public class MapGenerationSettings
+public class NameGeneratorSettings
 {
-    /// <summary>
-    /// Enable advanced name generation
-    /// </summary>
-    public bool UseAdvancedNameGeneration { get; set; } = true;
-    
-    /// <summary>
-    /// Generate unique language per culture
-    /// </summary>
-    public bool UniqueLanguagePerCulture { get; set; } = false;
-    
     /// <summary>
     /// Minimum name length
     /// </summary>
@@ -494,6 +991,11 @@ public class MapGenerationSettings
     /// Maximum name length
     /// </summary>
     public int MaxNameLength { get; set; } = 20;
+    
+    /// <summary>
+    /// Path to language template JSON files
+    /// </summary>
+    public string LanguageDataPath { get; set; } = "Data/Languages";
 }
 ```
 

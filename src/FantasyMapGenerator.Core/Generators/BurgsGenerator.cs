@@ -349,18 +349,37 @@ public class BurgsGenerator
     }
 
     /// <summary>
-    /// Generate names for burgs
+    /// Generate names for burgs using culture-specific name generators
     /// </summary>
     private void GenerateNames(List<Burg> burgs)
     {
-        // Simple name generation for now
-        // TODO: Implement culture-based name generation
         foreach (var burg in burgs.Where(b => b != null))
         {
             if (string.IsNullOrEmpty(burg.Name))
             {
-                string prefix = burg.IsCapital ? "Capital" : "Town";
-                burg.Name = $"{prefix}{burg.Id}";
+                // Get culture for this burg
+                var cell = _map.Cells[burg.CellId];
+                var culture = _map.Cultures?.FirstOrDefault(c => c.Id == cell.Culture);
+                
+                // Use culture's name generator if available
+                if (culture?.NameGenerator != null)
+                {
+                    try
+                    {
+                        burg.Name = culture.NameGenerator.Generate(FantasyNameGenerator.NameTypes.NameType.Burg);
+                    }
+                    catch
+                    {
+                        // Fallback to simple name if generation fails
+                        burg.Name = $"Burg{burg.Id}";
+                    }
+                }
+                else
+                {
+                    // Fallback for cultures without name generators
+                    string prefix = burg.IsCapital ? "Capital" : "Town";
+                    burg.Name = $"{prefix}{burg.Id}";
+                }
             }
         }
     }

@@ -1,0 +1,49 @@
+{
+  "name": "Celtic",
+  "description": "Celtic-inspired phonology (Irish, Welsh). Palatalization, lenition, complex consonant mutations.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "ptkbdgmnlrsʃfvθxɣw",
+    "vowels": "aeiouəɛɔ",
+    "liquids": "lrw",
+    "nasals": "mnŋ",
+    "fricatives": "fvθsʃxɣh",
+    "stops": "ptkbdg",
+    "sibilants": "sʃ",
+    "finals": "nrtɣ"
+  },
+  "orthography": {
+    "ʃ": "sh",
+    "θ": "th",
+    "ɣ": "gh",
+    "x": "ch",
+    "ə": "a",
+    "ɛ": "e",
+    "ɔ": "o",
+    "ŋ": "ng"
+  },
+  "phonotactics": {
+    "structures": ["CVC", "CCVC", "CV", "CVCC"],
+    "forbiddenSequences": ["θθ", "ɣɣ", "xx"],
+    "allowedOnsets": ["br", "bl", "dr", "gl", "gr", "pr", "pl", "tr", "kr", "kl", "fr", "fl", "sl", "sn", "st", "sp", "sk"],
+    "allowedCodas": ["n", "r", "t", "gh", "ch", "st", "nt", "rt"],
+    "maxConsonantCluster": 3,
+    "maxVowelCluster": 2,
+    "minSyllables": 1,
+    "maxSyllables": 3,
+    "enforceSonoritySequencing": true
+  },
+  "morphology": {
+    "prefixes": ["an-", "di-", "do-", "fo-"],
+    "suffixes": ["-og", "-ach", "-wyn", "-ydd", "-en"],
+    "compounding": {
+      "enabled": true,
+      "separator": ""
+    }
+  },
+  "grammar": {
+    "wordOrder": "VSO",
+    "genderSystem": "two-gender",
+    "numberSystem": ["singular", "plural"]
+  }
+}

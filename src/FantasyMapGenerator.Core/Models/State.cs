@@ -112,7 +112,7 @@ public class State
     /// <summary>
     /// Coat of arms
     /// </summary>
-    public CoatOfArms CoA { get; set; } = new();
+    public CoatOfArms? CoA { get; set; }
     
     /// <summary>
     /// True if state is locked (won't be modified)

@@ -364,6 +364,33 @@ public class MapGenerationSettings
     /// </summary>
     public int CurrentYear { get; set; } = 1000;
 
+    // === Zones Settings ===
+    
+    /// <summary>
+    /// Enable zone generation
+    /// </summary>
+    public bool GenerateZones { get; set; } = true;
+    
+    /// <summary>
+    /// Enable danger zones
+    /// </summary>
+    public bool GenerateDangerZones { get; set; } = true;
+    
+    /// <summary>
+    /// Enable protected areas
+    /// </summary>
+    public bool GenerateProtectedAreas { get; set; } = true;
+    
+    /// <summary>
+    /// Enable special zones
+    /// </summary>
+    public bool GenerateSpecialZones { get; set; } = true;
+    
+    /// <summary>
+    /// Zone density multiplier
+    /// </summary>
+    public double ZoneDensity { get; set; } = 1.0;
+
     /// <summary>
     /// Create RNG instance based on settings
     /// </summary>

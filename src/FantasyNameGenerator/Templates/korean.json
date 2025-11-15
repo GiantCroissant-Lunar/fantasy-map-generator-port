@@ -1,0 +1,48 @@
+{
+  "name": "Korean",
+  "description": "Korean-inspired phonology (Hangul). Complex vowel system, consonant clusters, liquid/nasal finals.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "kgntdlmsphbŋtʃ",
+    "vowels": "aeiouɯəʌɛø",
+    "liquids": "lr",
+    "nasals": "mnŋ",
+    "fricatives": "sh",
+    "stops": "kgtdpb",
+    "sibilants": "s",
+    "finals": "kntlmpŋ"
+  },
+  "orthography": {
+    "ʌ": "eo",
+    "ɯ": "eu",
+    "ə": "eo",
+    "ɛ": "ae",
+    "ø": "oe",
+    "tʃ": "j",
+    "ŋ": "ng"
+  },
+  "phonotactics": {
+    "structures": ["CV", "CVC", "V", "VC"],
+    "forbiddenSequences": ["ii", "uu", "ŋŋ"],
+    "allowedOnsets": ["k", "g", "n", "t", "d", "l", "m", "s", "p", "h", "b", "ng", "j", "ch", "kk", "tt", "pp", "ss", "jj"],
+    "allowedCodas": ["k", "n", "t", "l", "m", "p", "ng"],
+    "maxConsonantCluster": 2,
+    "maxVowelCluster": 2,
+    "minSyllables": 2,
+    "maxSyllables": 3,
+    "enforceSonoritySequencing": true
+  },
+  "morphology": {
+    "prefixes": ["han-", "dae-", "cho-"],
+    "suffixes": ["-ssi", "-nim", "-i", "-a", "-guk", "-do", "-si"],
+    "compounding": {
+      "enabled": true,
+      "separator": ""
+    }
+  },
+  "grammar": {
+    "wordOrder": "SOV",
+    "genderSystem": "none",
+    "numberSystem": ["singular", "plural"]
+  }
+}

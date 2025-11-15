@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ref-projects\Triangle.NET\src\Triangle\Triangle.csproj" />
+    <ProjectReference Include="..\FantasyNameGenerator\FantasyNameGenerator.csproj" />
   </ItemGroup>
 
 </Project>

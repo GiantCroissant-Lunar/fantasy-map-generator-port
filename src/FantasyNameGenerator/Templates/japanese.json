@@ -1,0 +1,44 @@
+{
+  "name": "Japanese",
+  "description": "Japanese-inspired phonology. Simple syllable structure (CV), no consonant clusters, five vowels.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "kgsztdnhbpmyrw",
+    "vowels": "aiueo",
+    "liquids": "rw",
+    "nasals": "nm",
+    "fricatives": "shz",
+    "stops": "kgtdpb",
+    "sibilants": "sz",
+    "finals": "n"
+  },
+  "orthography": {
+    "ʃ": "sh",
+    "tʃ": "ch",
+    "ts": "ts"
+  },
+  "phonotactics": {
+    "structures": ["CV", "V", "CVn"],
+    "forbiddenSequences": ["yi", "wu", "ti", "tu", "di", "du"],
+    "allowedOnsets": ["k", "g", "s", "z", "t", "d", "n", "h", "b", "p", "m", "y", "r", "w", "ky", "gy", "sh", "j", "ch", "ny", "hy", "by", "py", "my", "ry"],
+    "allowedCodas": ["n"],
+    "maxConsonantCluster": 1,
+    "maxVowelCluster": 2,
+    "minSyllables": 2,
+    "maxSyllables": 4,
+    "enforceSonoritySequencing": false
+  },
+  "morphology": {
+    "prefixes": ["o-", "go-"],
+    "suffixes": ["-san", "-kun", "-chan", "-sama", "-ya", "-ji", "-ro"],
+    "compounding": {
+      "enabled": true,
+      "separator": ""
+    }
+  },
+  "grammar": {
+    "wordOrder": "SOV",
+    "genderSystem": "none",
+    "numberSystem": ["singular"]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "Chinese",
+  "description": "Chinese-inspired phonology (Mandarin). Tonal language with limited codas, no consonant clusters.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "ptkmnlsfʃhʐtʃʂxŋ",
+    "vowels": "aiueoəɤyø",
+    "liquids": "lr",
+    "nasals": "mnŋ",
+    "fricatives": "fsʃhʐx",
+    "stops": "ptk",
+    "sibilants": "sʃʐ",
+    "finals": "nŋ"
+  },
+  "orthography": {
+    "ʃ": "sh",
+    "ʐ": "r",
+    "tʃ": "ch",
+    "ʂ": "sh",
+    "ə": "e",
+    "ɤ": "e",
+    "ø": "ü",
+    "y": "ü",
+    "ŋ": "ng"
+  },
+  "phonotactics": {
+    "structures": ["CV", "CVn", "CVŋ", "V"],
+    "forbiddenSequences": ["ii", "uu", "ŋi"],
+    "allowedOnsets": ["p", "t", "k", "m", "n", "l", "s", "f", "sh", "h", "r", "ch", "j", "q", "x", "zh"],
+    "allowedCodas": ["n", "ng", "r"],
+    "maxConsonantCluster": 1,
+    "maxVowelCluster": 3,
+    "minSyllables": 1,
+    "maxSyllables": 2,
+    "enforceSonoritySequencing": false
+  },
+  "morphology": {
+    "prefixes": ["a-", "lao-", "xiao-"],
+    "suffixes": ["-zi", "-er", "-tou", "-men"],
+    "compounding": {
+      "enabled": true,
+      "separator": ""
+    }
+  },
+  "grammar": {
+    "wordOrder": "SVO",
+    "genderSystem": "none",
+    "numberSystem": ["singular"]
+  }
+}
