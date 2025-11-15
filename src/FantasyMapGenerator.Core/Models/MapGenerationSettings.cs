@@ -253,6 +253,23 @@ public class MapGenerationSettings
     /// </summary>
     public string DomainWarpType { get; set; } = "OpenSimplex2";
 
+    // === Cultures Settings ===
+    
+    /// <summary>
+    /// Number of cultures to generate
+    /// </summary>
+    public int CultureCount { get; set; } = 10;
+    
+    /// <summary>
+    /// Culture set to use (European, Oriental, HighFantasy, DarkFantasy)
+    /// </summary>
+    public string CultureSet { get; set; } = "European";
+    
+    /// <summary>
+    /// Neutral area rate (affects culture expansion)
+    /// </summary>
+    public double NeutralRate { get; set; } = 1.0;
+    
     // === States Settings ===
     
     /// <summary>

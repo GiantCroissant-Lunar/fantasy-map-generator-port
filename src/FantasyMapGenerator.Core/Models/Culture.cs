@@ -1,72 +1,147 @@
 namespace FantasyMapGenerator.Core.Models;
 
 /// <summary>
-/// Represents a cultural group
+/// Represents a cultural group with distinct characteristics and naming
 /// </summary>
 public class Culture
 {
+    /// <summary>
+    /// Unique identifier (0 = wildlands/no culture)
+    /// </summary>
     public int Id { get; set; }
+    
+    /// <summary>
+    /// Culture name (e.g., "Angshire", "Norse", "Eldar")
+    /// </summary>
     public string Name { get; set; } = string.Empty;
-    public string? Base { get; set; } // Base culture name
-    public int State { get; set; } = -1; // Primary state
-
-    // Territory
-    public List<int> Cells { get; set; } = new();
-    public List<int> Burgs { get; set; } = new();
-    public double Area { get; set; }
-    public int Population { get; set; }
-
-    // Characteristics
+    
+    /// <summary>
+    /// 3-letter abbreviation code
+    /// </summary>
+    public string Code { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Culture color for map display
+    /// </summary>
+    public string Color { get; set; } = "#808080";
+    
+    // Geography
+    
+    /// <summary>
+    /// Origin cell where culture started
+    /// </summary>
+    public int CenterCellId { get; set; }
+    
+    /// <summary>
+    /// Culture type based on geography
+    /// </summary>
     public CultureType Type { get; set; }
-    public CultureFamily Family { get; set; }
-    public string? Race { get; set; }
-
-    // Names
-    public Dictionary<string, string> Names { get; set; } = new(); // Name templates
-    public string? MaleNames { get; set; }
-    public string? FemaleNames { get; set; }
-    public string? BurgNames { get; set; }
-    public string? StateNames { get; set; }
-
-    // Religion
-    public int Religion { get; set; } = -1;
-    public double Religiosity { get; set; } // 0-1 religious fervor
-
-    // Social
-    public SocialStructure Social { get; set; }
-    public EconomyType Economy { get; set; }
-    public TechnologyLevel Technology { get; set; }
-
-    // Military
-    public MilitaryTradition Military { get; set; }
-    public string? Units { get; set; } // Unit types
-
-    // Visual
-    public string Color { get; set; } = "#000000";
-    public string? Emblem { get; set; }
-
-    // Expansion
-    public double Expansionism { get; set; } // 0-1 expansion tendency
-    public int Assimilation { get; set; } // 0-100 assimilation rate
-
-    public Culture(int id)
-    {
-        Id = id;
-    }
+    
+    /// <summary>
+    /// Expansionism factor (0.5-2.0, affects spread rate)
+    /// </summary>
+    public double Expansionism { get; set; }
+    
+    // Language & Identity
+    
+    /// <summary>
+    /// Name base ID for linguistic patterns
+    /// </summary>
+    public int NameBaseId { get; set; }
+    
+    /// <summary>
+    /// Heraldic shield shape (heater, wedged, round, etc.)
+    /// </summary>
+    public string Shield { get; set; } = "heater";
+    
+    /// <summary>
+    /// Parent culture IDs (for cultural evolution)
+    /// </summary>
+    public List<int> Origins { get; set; } = new();
+    
+    // Statistics
+    
+    /// <summary>
+    /// Number of cells with this culture
+    /// </summary>
+    public int CellCount { get; set; }
+    
+    /// <summary>
+    /// Total area in square kilometers
+    /// </summary>
+    public double Area { get; set; }
+    
+    /// <summary>
+    /// Rural population (thousands)
+    /// </summary>
+    public double RuralPopulation { get; set; }
+    
+    /// <summary>
+    /// Urban population (thousands)
+    /// </summary>
+    public double UrbanPopulation { get; set; }
+    
+    /// <summary>
+    /// True if culture is locked (won't be modified)
+    /// </summary>
+    public bool IsLocked { get; set; }
+    
+    /// <summary>
+    /// True if culture has been removed
+    /// </summary>
+    public bool IsRemoved { get; set; }
 }
 
+/// <summary>
+/// Culture type based on geography and lifestyle
+/// </summary>
 public enum CultureType
 {
+    /// <summary>
+    /// Generic inland culture
+    /// </summary>
     Generic,
-    Nomadic,
-    Highland,
+    
+    /// <summary>
+    /// Seafaring coastal culture (low water crossing penalty)
+    /// </summary>
     Naval,
-    Forest,
-    Desert,
-    Arctic,
-    Tropical,
-    Civilized,
-    Barbarian
+    
+    /// <summary>
+    /// Lake-dwelling culture (lake crossing bonus)
+    /// </summary>
+    Lake,
+    
+    /// <summary>
+    /// Mountain-dwelling culture (highland bonus)
+    /// </summary>
+    Highland,
+    
+    /// <summary>
+    /// River-focused culture (river bonus)
+    /// </summary>
+    River,
+    
+    /// <summary>
+    /// Desert/steppe nomadic culture (avoid forests)
+    /// </summary>
+    Nomadic,
+    
+    /// <summary>
+    /// Forest hunting culture (forest bonus)
+    /// </summary>
+    Hunting
+}
+
+/// <summary>
+/// Default culture definition
+/// </summary>
+public class DefaultCulture
+{
+    public string Name { get; set; } = string.Empty;
+    public int NameBaseId { get; set; }
+    public double Probability { get; set; } = 1.0;
+    public string Shield { get; set; } = "heater";
 }
 
 public enum CultureFamily
