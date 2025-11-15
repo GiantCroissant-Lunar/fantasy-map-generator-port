@@ -194,6 +194,20 @@ public class MapGenerator
         // Generate basic states
         GenerateBasicStates(mapData, settings, politicalRng);
 
+        // Generate cultures
+        if (settings.CultureCount > 0)
+        {
+            var culturesGenerator = new CulturesGenerator(mapData, politicalRng, settings);
+            mapData.Cultures = culturesGenerator.Generate();
+        }
+
+        // Generate religions
+        if (settings.ReligionCount > 0)
+        {
+            var religionsGenerator = new ReligionsGenerator(mapData, politicalRng, settings);
+            mapData.Religions = religionsGenerator.Generate();
+        }
+
         return mapData;
     }
 
