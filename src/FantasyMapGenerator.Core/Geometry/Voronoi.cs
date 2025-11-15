@@ -1,3 +1,4 @@
+using System.Linq;
 using FantasyMapGenerator.Core.Models;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
@@ -16,11 +17,11 @@ public class Voronoi
     private readonly Delaunator _delaunay;
     private readonly Point[] _points;
     private readonly int _pointsN;
-    
+
     // Voronoi cells data
     public VoronoiCells Cells { get; private set; }
     public VoronoiVertices Vertices { get; private set; }
-    
+
     public Voronoi(Delaunator delaunay, Point[] points, int pointsN)
     {
         _delaunay = delaunay;
@@ -110,6 +111,7 @@ public class Voronoi
 
     /// <summary>
     /// Builds Voronoi cells directly from NTS VoronoiDiagramBuilder output
+    /// Populates vertices and neighbor lists.
     /// </summary>
     private void BuildFromNtsDiagram(NtsGeometry diagram, Coordinate[] siteCoords, Dictionary<Coordinate, int> coordToIndex)
     {
@@ -129,51 +131,106 @@ public class Voronoi
         Vertices.Coordinates = new List<Point>();
         var vertexToIndex = new Dictionary<Coordinate, int>(new CoordinateEqualityComparer());
 
-        // Process each polygon in the diagram
+        // Edge ownership map for adjacency detection (by vertex indices, order-independent)
+        var edgeOwner = new Dictionary<(int a, int b), int>();
+
+        // Use diagram envelope to detect border cells
+        var env = diagram.EnvelopeInternal;
+        double minX = env.MinX, minY = env.MinY, maxX = env.MaxX, maxY = env.MaxY;
+        const double eps = 1e-6;
+
+        void Process(NtsGeometry geom)
+        {
+            if (geom is not Polygon poly) return;
+
+            // Associate polygon to nearest site via centroid
+            var centroid = poly.Centroid.Coordinate;
+            int siteIdx = FindClosestIndex(centroid, siteCoords);
+
+            // Extract vertices and build edges
+            var ring = poly.ExteriorRing.Coordinates;
+            int prevVertexIdx = -1;
+            for (int i = 0; i < ring.Length - 1; i++) // skip last (duplicate of first)
+            {
+                var coord = ring[i];
+
+                // Add vertex if new
+                if (!vertexToIndex.TryGetValue(coord, out int vertexIdx))
+                {
+                    vertexIdx = Vertices.Coordinates.Count;
+                    Vertices.Coordinates.Add(new Point(coord.X, coord.Y));
+                    vertexToIndex[coord] = vertexIdx;
+                }
+
+                Cells.Vertices[siteIdx].Add(vertexIdx);
+
+                // Border detection: vertex near clip envelope boundary
+                if (Math.Abs(coord.X - minX) < eps || Math.Abs(coord.X - maxX) < eps ||
+                    Math.Abs(coord.Y - minY) < eps || Math.Abs(coord.Y - maxY) < eps)
+                {
+                    Cells.IsBorder[siteIdx] = true;
+                }
+
+                // Build undirected edge with previous vertex
+                if (prevVertexIdx >= 0)
+                {
+                    var key = prevVertexIdx < vertexIdx ? (prevVertexIdx, vertexIdx) : (vertexIdx, prevVertexIdx);
+                    if (edgeOwner.TryGetValue(key, out var otherSite))
+                    {
+                        if (otherSite != siteIdx)
+                        {
+                            // Add mutual neighbors (avoid duplicates)
+                            if (!Cells.Neighbors[siteIdx].Contains(otherSite)) Cells.Neighbors[siteIdx].Add(otherSite);
+                            if (!Cells.Neighbors[otherSite].Contains(siteIdx)) Cells.Neighbors[otherSite].Add(siteIdx);
+                        }
+                    }
+                    else
+                    {
+                        edgeOwner[key] = siteIdx;
+                    }
+                }
+
+                prevVertexIdx = vertexIdx;
+            }
+
+            // Close ring edge (last to first)
+            if (Cells.Vertices[siteIdx].Count > 1)
+            {
+                int first = Cells.Vertices[siteIdx][0];
+                int last = Cells.Vertices[siteIdx][Cells.Vertices[siteIdx].Count - 1];
+                var key = first < last ? (first, last) : (last, first);
+                if (edgeOwner.TryGetValue(key, out var otherSite))
+                {
+                    if (otherSite != siteIdx)
+                    {
+                        if (!Cells.Neighbors[siteIdx].Contains(otherSite)) Cells.Neighbors[siteIdx].Add(otherSite);
+                        if (!Cells.Neighbors[otherSite].Contains(siteIdx)) Cells.Neighbors[otherSite].Add(siteIdx);
+                    }
+                }
+                else
+                {
+                    edgeOwner[key] = siteIdx;
+                }
+            }
+        }
+
         if (diagram is GeometryCollection collection)
         {
             foreach (NtsGeometry geom in collection.Geometries)
             {
-                ProcessVoronoiPolygon(geom, siteCoords, vertexToIndex);
+                Process(geom);
             }
         }
         else
         {
-            ProcessVoronoiPolygon(diagram, siteCoords, vertexToIndex);
+            Process(diagram);
         }
 
-        Console.WriteLine($"Built Voronoi from NTS: {_pointsN} sites, {Vertices.Coordinates.Count} vertices");
+        // Stats
+        int neighborPairs = Cells.Neighbors.Sum(n => n.Count) / 2;
+        Console.WriteLine($"Built Voronoi from NTS: {_pointsN} sites, {Vertices.Coordinates.Count} vertices, ~{neighborPairs} adjacencies");
     }
 
-    private void ProcessVoronoiPolygon(NtsGeometry geom, Coordinate[] siteCoords, Dictionary<Coordinate, int> vertexToIndex)
-    {
-        if (geom is Polygon poly && poly.UserData is Coordinate siteCoord)
-        {
-            // Find which site this polygon belongs to
-            int siteIdx = FindClosestIndex(siteCoord, siteCoords);
-
-                // Extract vertices
-                var ring = poly.ExteriorRing.Coordinates;
-                for (int i = 0; i < ring.Length - 1; i++) // Skip last (duplicate of first)
-                {
-                    var coord = ring[i];
-
-                    // Add vertex if new
-                    if (!vertexToIndex.TryGetValue(coord, out int vertexIdx))
-                    {
-                        vertexIdx = Vertices.Coordinates.Count;
-                        Vertices.Coordinates.Add(new Point(coord.X, coord.Y));
-                        vertexToIndex[coord] = vertexIdx;
-                    }
-
-                    Cells.Vertices[siteIdx].Add(vertexIdx);
-                }
-
-            // TODO: Build neighbors by finding adjacent polygons
-            // For now, leave neighbors empty - not critical for rendering
-        }
-    }
-    
     /// <summary>
     /// Builds the Voronoi diagram from the Delaunay triangulation
     /// </summary>
@@ -183,11 +240,11 @@ public class Voronoi
         Cells.Vertices = new List<int>[_pointsN];
         Cells.Neighbors = new List<int>[_pointsN];
         Cells.IsBorder = new bool[_pointsN];
-        
+
         Vertices.Coordinates = new List<Point>();
         Vertices.Cells = new List<int>[0]; // Will be resized as needed
         Vertices.Neighbors = new List<int>[0]; // Will be resized as needed
-        
+
         // Process each half-edge in the triangulation (build triangle circumcenters and adjacency)
         for (int e = 0; e < _delaunay.Triangles.Length; e++)
         {
@@ -199,7 +256,7 @@ public class Voronoi
                 int oldSize = Vertices.Coordinates.Count;
                 var newCellsSize = Vertices.Cells?.Length ?? 0;
                 var newNeighborsSize = Vertices.Neighbors?.Length ?? 0;
-                
+
                 if (newCellsSize <= t)
                 {
                     var cellsArray = Vertices.Cells;
@@ -212,22 +269,22 @@ public class Voronoi
                     Array.Resize(ref neighborsArray, t + 1);
                     Vertices.Neighbors = neighborsArray;
                 }
-                
+
                 for (int i = oldSize; i <= t; i++)
                 {
                     Vertices.Cells[i] = new List<int>();
                     Vertices.Neighbors[i] = new List<int>();
                 }
             }
-            
+
             if (Vertices.Coordinates.Count == t)
             {
                 // Calculate triangle center (circumcenter)
                 Vertices.Coordinates.Add(TriangleCenter(t));
-                
+
                 // Get adjacent triangles
                 Vertices.Neighbors[t] = TrianglesAdjacentToTriangle(t).ToList();
-                
+
                 // Get triangle points (cells)
                 Vertices.Cells[t] = PointsOfTriangle(t).ToList();
             }
@@ -325,7 +382,7 @@ public class Voronoi
 
         OrderCellVertices();
     }
-    
+
     /// <summary>
     /// Gets the next half-edge in the triangle
     /// </summary>
@@ -333,7 +390,7 @@ public class Voronoi
     {
         return (e % 3 == 2) ? e - 2 : e + 1;
     }
-    
+
     /// <summary>
     /// Gets the previous half-edge in the triangle
     /// </summary>
@@ -341,7 +398,7 @@ public class Voronoi
     {
         return (e % 3 == 0) ? e + 2 : e - 1;
     }
-    
+
     /// <summary>
     /// Gets the triangle index from a half-edge
     /// </summary>
@@ -349,7 +406,7 @@ public class Voronoi
     {
         return e / 3;
     }
-    
+
     /// <summary>
     /// Gets all half-edges around a point
     /// </summary>
@@ -357,7 +414,7 @@ public class Voronoi
     {
         var edges = new List<int>();
         int e = start;
-        
+
         do
         {
             edges.Add(e);
@@ -370,10 +427,10 @@ public class Voronoi
             }
             e = opposite;
         } while (e != start);
-        
+
         return edges;
     }
-    
+
     /// <summary>
     /// Gets the three points of a triangle
     /// </summary>
@@ -381,7 +438,7 @@ public class Voronoi
     {
         return EdgesOfTriangle(t).Select(edge => _delaunay.Triangles[edge]).ToArray();
     }
-    
+
     /// <summary>
     /// Gets the three half-edges of a triangle
     /// </summary>
@@ -389,7 +446,7 @@ public class Voronoi
     {
         return new[] { 3 * t, 3 * t + 1, 3 * t + 2 };
     }
-    
+
     /// <summary>
     /// Gets triangles adjacent to a given triangle
     /// </summary>
@@ -397,7 +454,7 @@ public class Voronoi
     {
         var adjacent = new List<int>();
         var edges = EdgesOfTriangle(t);
-        
+
         foreach (var edge in edges)
         {
             int opposite = _delaunay.Halfedges[edge];
@@ -406,10 +463,10 @@ public class Voronoi
                 adjacent.Add(TriangleOfEdge(opposite));
             }
         }
-        
+
         return adjacent;
     }
-    
+
     /// <summary>
     /// Calculates the circumcenter of a triangle
     /// </summary>
@@ -419,25 +476,25 @@ public class Voronoi
         var p1 = _points[_delaunay.Triangles[edges[0]]];
         var p2 = _points[_delaunay.Triangles[edges[1]]];
         var p3 = _points[_delaunay.Triangles[edges[2]]];
-        
+
         // Calculate circumcenter using perpendicular bisectors
         double ax = p1.X, ay = p1.Y;
         double bx = p2.X, by = p2.Y;
         double cx = p3.X, cy = p3.Y;
-        
+
         double d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
         if (Math.Abs(d) < double.Epsilon)
         {
             // Degenerate triangle, return centroid
             return new Point((ax + bx + cx) / 3, (ay + by + cy) / 3);
         }
-        
+
         double ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d;
         double uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d;
-        
+
         return new Point(ux, uy);
     }
-    
+
     /// <summary>
     /// Gets all cells that are on the border of the diagram
     /// </summary>
@@ -453,7 +510,7 @@ public class Voronoi
         }
         return borderCells;
     }
-    
+
     /// <summary>
     /// Gets all cells that are not on the border
     /// </summary>
@@ -469,7 +526,7 @@ public class Voronoi
         }
         return interiorCells;
     }
-    
+
     /// <summary>
     /// Gets the vertices of a specific cell as Point objects
     /// </summary>
@@ -477,12 +534,12 @@ public class Voronoi
     {
         if (cellId < 0 || cellId >= Cells.Vertices.Length || Cells.Vertices[cellId] == null)
             return new List<Point>();
-        
+
         return Cells.Vertices[cellId]
             .Select(vertexId => vertexId < Vertices.Coordinates.Count ? Vertices.Coordinates[vertexId] : Point.Zero)
             .ToList();
     }
-    
+
     /// <summary>
     /// Gets the neighbors of a specific cell
     /// </summary>
@@ -490,10 +547,10 @@ public class Voronoi
     {
         if (cellId < 0 || cellId >= Cells.Neighbors.Length || Cells.Neighbors[cellId] == null)
             return new List<int>();
-        
+
         return Cells.Neighbors[cellId];
     }
-    
+
     /// <summary>
     /// Checks if a cell is on the border
     /// </summary>

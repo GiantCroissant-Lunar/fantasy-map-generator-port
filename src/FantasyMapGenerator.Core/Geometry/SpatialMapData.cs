@@ -1,6 +1,6 @@
+using FantasyMapGenerator.Core.Models;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
-using FantasyMapGenerator.Core.Models;
 using FmgPoint = FantasyMapGenerator.Core.Models.Point;
 using NtsGeometry = NetTopologySuite.Geometries.Geometry;
 
@@ -17,7 +17,7 @@ public class SpatialMapData : MapData
     private STRtree<State>? _stateIndex;
     private bool _indexBuilt = false;
 
-    public SpatialMapData(int width, int height, int cellsDesired) 
+    public SpatialMapData(int width, int height, int cellsDesired)
         : base(width, height, cellsDesired)
     {
     }
@@ -59,7 +59,7 @@ public class SpatialMapData : MapData
         {
             var stateCells = GetStateCells(state.Id).ToList();
             if (stateCells.Count == 0) continue;
-            
+
             var envelope = GetCellsEnvelope(stateCells);
             _stateIndex.Insert(envelope, state);
         }
@@ -76,7 +76,7 @@ public class SpatialMapData : MapData
     public List<Cell> QueryCellsInRadius(FmgPoint center, double radius)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = new Envelope(
             center.X - radius,
             center.X + radius,
@@ -84,7 +84,7 @@ public class SpatialMapData : MapData
             center.Y + radius);
 
         var candidates = _cellIndex!.Query(envelope);
-        
+
         return candidates
             .Where(c => Distance(c.Center, center) <= radius)
             .ToList();
@@ -101,7 +101,7 @@ public class SpatialMapData : MapData
     public List<Cell> QueryCellsInRectangle(double minX, double minY, double maxX, double maxY)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = new Envelope(minX, maxX, minY, maxY);
         return _cellIndex!.Query(envelope).ToList();
     }
@@ -114,10 +114,10 @@ public class SpatialMapData : MapData
     public List<Cell> QueryCellsIntersecting(NtsGeometry geometry)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = geometry.EnvelopeInternal;
         var candidates = _cellIndex!.Query(envelope);
-        
+
         var adapter = new NtsGeometryAdapter();
         return candidates
             .Where(c =>
@@ -137,7 +137,7 @@ public class SpatialMapData : MapData
     public List<Burg> QueryBurgsInRadius(FmgPoint center, double radius)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = new Envelope(
             center.X - radius,
             center.X + radius,
@@ -145,7 +145,7 @@ public class SpatialMapData : MapData
             center.Y + radius);
 
         var candidates = _burgIndex!.Query(envelope);
-        
+
         return candidates
             .Where(b =>
             {
@@ -163,10 +163,10 @@ public class SpatialMapData : MapData
     public List<Burg> QueryBurgsInGeometry(NtsGeometry geometry)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = geometry.EnvelopeInternal;
         var candidates = _burgIndex!.Query(envelope);
-        
+
         var factory = new GeometryFactory();
         return candidates
             .Where(b =>
@@ -186,10 +186,10 @@ public class SpatialMapData : MapData
     public List<River> QueryRiversIntersecting(NtsGeometry geometry)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = geometry.EnvelopeInternal;
         var candidates = _riverIndex!.Query(envelope);
-        
+
         var adapter = new NtsGeometryAdapter();
         return candidates
             .Where(r =>
@@ -208,10 +208,10 @@ public class SpatialMapData : MapData
     public List<State> QueryStatesIntersecting(NtsGeometry geometry)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = geometry.EnvelopeInternal;
         var candidates = _stateIndex!.Query(envelope);
-        
+
         var boundaryGenerator = new StateBoundaryGenerator();
         return candidates
             .Where(s =>
@@ -231,7 +231,7 @@ public class SpatialMapData : MapData
     public Cell? FindNearestCell(FmgPoint point, double maxDistance = double.MaxValue)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = new Envelope(
             point.X - maxDistance,
             point.X + maxDistance,
@@ -239,7 +239,7 @@ public class SpatialMapData : MapData
             point.Y + maxDistance);
 
         var candidates = _cellIndex!.Query(envelope);
-        
+
         Cell? nearest = null;
         var minDistance = maxDistance;
 
@@ -265,7 +265,7 @@ public class SpatialMapData : MapData
     public Burg? FindNearestBurg(FmgPoint point, double maxDistance = double.MaxValue)
     {
         EnsureIndexBuilt();
-        
+
         var envelope = new Envelope(
             point.X - maxDistance,
             point.X + maxDistance,
@@ -273,7 +273,7 @@ public class SpatialMapData : MapData
             point.Y + maxDistance);
 
         var candidates = _burgIndex!.Query(envelope);
-        
+
         Burg? nearest = null;
         var minDistance = maxDistance;
 
@@ -420,7 +420,7 @@ public class SpatialMapData : MapData
         if (_burgIndex != null) memory += Burgs.Count * 100;
         if (_riverIndex != null) memory += Rivers.Count * 100;
         if (_stateIndex != null) memory += States.Count * 100;
-        
+
         return memory;
     }
 }

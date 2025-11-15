@@ -1,6 +1,6 @@
+using FantasyMapGenerator.Core.Geometry;
 using FantasyMapGenerator.Core.Models;
 using FantasyMapGenerator.Core.Noise;
-using FantasyMapGenerator.Core.Geometry;
 
 namespace FantasyMapGenerator.Core.Generators;
 
@@ -46,7 +46,7 @@ public class FastNoiseHeightmapGenerator
         for (int i = 0; i < mapData.Cells.Count; i++)
         {
             var cell = mapData.Cells[i];
-            
+
             // Normalize coordinates to [0, 1]
             float nx = (float)(cell.Center.X / width);
             float ny = (float)(cell.Center.Y / height);
@@ -113,7 +113,7 @@ public class FastNoiseHeightmapGenerator
         for (int i = 0; i < mapData.Cells.Count; i++)
         {
             var cell = mapData.Cells[i];
-            
+
             // Normalize coordinates to [0, 1]
             float nx = (float)(cell.Center.X / width);
             float ny = (float)(cell.Center.Y / height);

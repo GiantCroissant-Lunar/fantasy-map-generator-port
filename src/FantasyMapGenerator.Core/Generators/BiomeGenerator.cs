@@ -1,5 +1,5 @@
-using FantasyMapGenerator.Core.Models;
 using FantasyMapGenerator.Core.Geometry;
+using FantasyMapGenerator.Core.Models;
 using FantasyMapGenerator.Core.Random;
 
 namespace FantasyMapGenerator.Core.Generators;
@@ -12,23 +12,28 @@ public class BiomeGenerator
 {
     private readonly MapData _map;
     private readonly Biome[] _biomes;
-    
+
     public BiomeGenerator(MapData map)
     {
         _map = map;
         _biomes = CreateDefaultBiomes();
     }
-    
+
     /// <summary>
     /// Generates biomes for all cells in the map with seeded RNG
     /// </summary>
     public void GenerateBiomes(IRandomSource random)
     {
+        // Add biome definitions to map so they can be accessed by renderers
+        _map.Biomes.Clear();
+        _map.Biomes.AddRange(_biomes);
+
         CalculateTemperature(random);
         CalculatePrecipitation(random);
         AssignBiomes();
+        SmoothBiomes();
     }
-    
+
     /// <summary>
     /// Gets the default biome definitions
     /// </summary>
@@ -36,14 +41,14 @@ public class BiomeGenerator
     {
         return _biomes;
     }
-    
+
     /// <summary>
     /// Creates the default biome definitions
     /// </summary>
     private static Biome[] CreateDefaultBiomes()
     {
         var biomes = new Biome[13];
-        
+
         // Marine (0)
         biomes[0] = new Biome(0)
         {
@@ -59,7 +64,7 @@ public class BiomeGenerator
             MinPrecipitation = 0,
             MaxPrecipitation = 2
         };
-        
+
         // Hot Desert (1)
         biomes[1] = new Biome(1)
         {
@@ -76,7 +81,7 @@ public class BiomeGenerator
             MinPrecipitation = 0,
             MaxPrecipitation = 0.2
         };
-        
+
         // Cold Desert (2)
         biomes[2] = new Biome(2)
         {
@@ -93,7 +98,7 @@ public class BiomeGenerator
             MinPrecipitation = 0,
             MaxPrecipitation = 0.3
         };
-        
+
         // Savanna (3)
         biomes[3] = new Biome(3)
         {
@@ -108,7 +113,7 @@ public class BiomeGenerator
             MinPrecipitation = 0.2,
             MaxPrecipitation = 0.6
         };
-        
+
         // Grassland (4)
         biomes[4] = new Biome(4)
         {
@@ -123,7 +128,7 @@ public class BiomeGenerator
             MinPrecipitation = 0.3,
             MaxPrecipitation = 0.8
         };
-        
+
         // Tropical Seasonal Forest (5)
         biomes[5] = new Biome(5)
         {
@@ -140,7 +145,7 @@ public class BiomeGenerator
             MinPrecipitation = 0.6,
             MaxPrecipitation = 1.2
         };
-        
+
         // Temperate Deciduous Forest (6)
         biomes[6] = new Biome(6)
         {
@@ -156,7 +161,7 @@ public class BiomeGenerator
             MinPrecipitation = 0.5,
             MaxPrecipitation = 1.5
         };
-        
+
         // Tropical Rainforest (7)
         biomes[7] = new Biome(7)
         {
@@ -173,7 +178,7 @@ public class BiomeGenerator
             MinPrecipitation = 1.0,
             MaxPrecipitation = 2
         };
-        
+
         // Temperate Rainforest (8)
         biomes[8] = new Biome(8)
         {
@@ -189,7 +194,7 @@ public class BiomeGenerator
             MinPrecipitation = 0.8,
             MaxPrecipitation = 2
         };
-        
+
         // Taiga (9)
         biomes[9] = new Biome(9)
         {
@@ -206,7 +211,7 @@ public class BiomeGenerator
             MinPrecipitation = 0.3,
             MaxPrecipitation = 0.8
         };
-        
+
         // Tundra (10)
         biomes[10] = new Biome(10)
         {
@@ -222,7 +227,7 @@ public class BiomeGenerator
             MinPrecipitation = 0,
             MaxPrecipitation = 0.5
         };
-        
+
         // Glacier (11)
         biomes[11] = new Biome(11)
         {
@@ -238,7 +243,7 @@ public class BiomeGenerator
             MinPrecipitation = 0,
             MaxPrecipitation = 0.3
         };
-        
+
         // Wetland (12)
         biomes[12] = new Biome(12)
         {
@@ -253,10 +258,10 @@ public class BiomeGenerator
             MinPrecipitation = 0.8,
             MaxPrecipitation = 2
         };
-        
+
         return biomes;
     }
-    
+
 
     /// <summary>
     /// Calculates temperature for each cell based on latitude and elevation with seeded RNG
@@ -265,23 +270,23 @@ public class BiomeGenerator
     {
         double mapHeight = _map.Height;
         double equatorY = mapHeight / 2;
-        
+
         for (int i = 0; i < _map.Cells.Count; i++)
         {
             var cell = _map.Cells[i];
             double latitude = Math.Abs(cell.Center.Y - equatorY) / equatorY; // 0 at equator, 1 at poles
             double elevation = cell.Height / 100.0; // 0-1
-            
+
             // Base temperature decreases with latitude and elevation
             double temperature = 1.0 - (latitude * 1.5) - (elevation * 0.8);
-            
+
             // Add some random variation
             temperature += (random.NextDouble() - 0.5) * 0.2;
-            
+
             cell.Temperature = Math.Clamp(temperature, -1, 2);
         }
     }
-    
+
 
     /// <summary>
     /// Calculates precipitation for each cell based on temperature and distance from water with seeded RNG
@@ -291,10 +296,10 @@ public class BiomeGenerator
         for (int i = 0; i < _map.Cells.Count; i++)
         {
             var cell = _map.Cells[i];
-            
+
             // Base precipitation from temperature
             double precipitation = Math.Max(0, cell.Temperature * 0.8);
-            
+
             // Increase precipitation near water
             if (cell.IsBorder)
             {
@@ -316,21 +321,21 @@ public class BiomeGenerator
                         }
                     }
                 }
-                
+
                 if (minDistanceToWater < double.MaxValue)
                 {
                     double distanceFactor = Math.Max(0, 1 - minDistanceToWater / 100);
                     precipitation += distanceFactor * 0.4;
                 }
             }
-            
+
             // Add some random variation
             precipitation += (random.NextDouble() - 0.5) * 0.3;
-            
+
             cell.Precipitation = Math.Clamp(precipitation, 0, 2);
         }
     }
-    
+
     /// <summary>
     /// Assigns biomes to cells based on their climate conditions
     /// </summary>
@@ -339,24 +344,24 @@ public class BiomeGenerator
         for (int i = 0; i < _map.Cells.Count; i++)
         {
             var cell = _map.Cells[i];
-            
+
             // Find the best matching biome
             int bestBiome = 0;
             double bestScore = double.MaxValue;
-            
+
             for (int j = 0; j < _biomes.Length; j++)
             {
                 var biome = _biomes[j];
-                
+
                 if (biome.IsSuitable(cell.Temperature, cell.Precipitation, cell.Height))
                 {
                     // Calculate how well this biome fits
                     double tempDiff = Math.Abs(cell.Temperature - (biome.MinTemperature + biome.MaxTemperature) / 2);
                     double precipDiff = Math.Abs(cell.Precipitation - (biome.MinPrecipitation + biome.MaxPrecipitation) / 2);
                     double heightDiff = Math.Abs(cell.Height - (biome.MinHeight + biome.MaxHeight) / 2);
-                    
+
                     double score = tempDiff + precipDiff + heightDiff * 0.01;
-                    
+
                     if (score < bestScore)
                     {
                         bestScore = score;
@@ -364,29 +369,29 @@ public class BiomeGenerator
                     }
                 }
             }
-            
+
             cell.Biome = bestBiome;
         }
-        
+
         // Apply some smoothing to reduce biome fragmentation
         SmoothBiomes();
     }
-    
+
     /// <summary>
     /// Smooths biome assignments to reduce fragmentation
     /// </summary>
     private void SmoothBiomes()
     {
         var newBiomes = new int[_map.Cells.Count];
-        
+
         for (int i = 0; i < _map.Cells.Count; i++)
         {
             var cell = _map.Cells[i];
             var biomeCounts = new Dictionary<int, int>();
-            
+
             // Count biomes in neighborhood
             biomeCounts[cell.Biome] = biomeCounts.GetValueOrDefault(cell.Biome, 0) + 2; // Weight center cell more
-            
+
             foreach (int neighborId in cell.Neighbors)
             {
                 if (neighborId >= 0 && neighborId < _map.Cells.Count)
@@ -395,11 +400,11 @@ public class BiomeGenerator
                     biomeCounts[neighborCell.Biome] = biomeCounts.GetValueOrDefault(neighborCell.Biome, 0) + 1;
                 }
             }
-            
+
             // Find the most common biome
             int mostCommonBiome = cell.Biome;
             int maxCount = biomeCounts.GetValueOrDefault(cell.Biome, 0);
-            
+
             foreach (var kvp in biomeCounts)
             {
                 if (kvp.Value > maxCount)
@@ -408,10 +413,10 @@ public class BiomeGenerator
                     mostCommonBiome = kvp.Key;
                 }
             }
-            
+
             newBiomes[i] = mostCommonBiome;
         }
-        
+
         // Apply smoothed biomes
         for (int i = 0; i < _map.Cells.Count; i++)
         {

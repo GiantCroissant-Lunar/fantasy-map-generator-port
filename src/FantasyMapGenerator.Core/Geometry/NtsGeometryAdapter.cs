@@ -1,9 +1,9 @@
+using FantasyMapGenerator.Core.Models;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
-using FantasyMapGenerator.Core.Models;
 using FmgPoint = FantasyMapGenerator.Core.Models.Point;
-using NtsPoint = NetTopologySuite.Geometries.Point;
 using NtsGeometry = NetTopologySuite.Geometries.Geometry;
+using NtsPoint = NetTopologySuite.Geometries.Point;
 
 namespace FantasyMapGenerator.Core.Geometry;
 
@@ -227,7 +227,7 @@ public class NtsGeometryAdapter
     public NtsGeometry FixGeometry(NtsGeometry geometry)
     {
         if (geometry.IsValid) return geometry;
-        
+
         return NetTopologySuite.Geometries.Utilities.GeometryFixer.Fix(geometry);
     }
 

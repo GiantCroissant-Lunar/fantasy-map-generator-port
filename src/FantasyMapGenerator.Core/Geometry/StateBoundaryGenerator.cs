@@ -1,6 +1,6 @@
+using FantasyMapGenerator.Core.Models;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Simplify;
-using FantasyMapGenerator.Core.Models;
 using NtsGeometry = NetTopologySuite.Geometries.Geometry;
 
 namespace FantasyMapGenerator.Core.Geometry;
@@ -40,7 +40,7 @@ public class StateBoundaryGenerator
         }
 
         var stateCells = map.GetStateCells(stateId).ToList();
-        
+
         if (stateCells.Count == 0)
         {
             return new GeometryFactory().CreatePolygon();
@@ -110,15 +110,15 @@ public class StateBoundaryGenerator
 
             // Calculate adaptive parameters based on state size
             var stateSizeRatio = (double)stateCells.Count / totalCells;
-            
+
             // Larger states get more simplification and smoothing
             var adaptiveSimplification = baseSimplification * Math.Sqrt(stateSizeRatio) * 2;
             var adaptiveSmoothing = baseSmoothing * Math.Sqrt(stateSizeRatio);
 
             boundaries[state.Id] = GetStateBoundary(
-                state.Id, 
-                map, 
-                adaptiveSimplification, 
+                state.Id,
+                map,
+                adaptiveSimplification,
                 adaptiveSmoothing);
         }
 
@@ -180,7 +180,7 @@ public class StateBoundaryGenerator
                 AverageElevation = stateCells.Average(c => c.Height),
                 TotalPopulation = stateCells.Sum(c => c.Population),
                 BurgCount = stateCells.Count(c => c.Burg >= 0),
-                HasCoastline = stateCells.Any(c => c.IsLand && 
+                HasCoastline = stateCells.Any(c => c.IsLand &&
                     c.Neighbors.Any(n => n >= 0 && map.Cells[n].IsOcean))
             };
 
@@ -203,7 +203,7 @@ public class StateBoundaryGenerator
         foreach (var state in map.States)
         {
             var boundary = GetStateBoundary(state.Id, map);
-            
+
             // Calculate required simplification
             var currentVertices = CountVertices(boundary);
             if (currentVertices <= maxVertices)
@@ -215,7 +215,7 @@ public class StateBoundaryGenerator
             // Binary search for appropriate tolerance
             var tolerance = FindOptimalTolerance(boundary, maxVertices);
             var simplified = DouglasPeuckerSimplifier.Simplify(boundary, tolerance);
-            
+
             optimized[state.Id] = simplified;
         }
 

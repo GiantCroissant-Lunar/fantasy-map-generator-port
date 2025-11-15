@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FantasyMapGenerator.Core.Models;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
-using FantasyMapGenerator.Core.Models;
 using FmgPoint = FantasyMapGenerator.Core.Models.Point;
 
 namespace FantasyMapGenerator.Core.Geometry;
@@ -165,7 +165,7 @@ public class GeoJsonExporter
         foreach (var cell in mapData.Cells)
         {
             var polygon = _adapter.CellToPolygon(cell, mapData.Vertices);
-            
+
             if (config.SimplifyGeometries)
             {
                 polygon = SimplifyGeometry(polygon, config.SimplificationTolerance) as Polygon ?? polygon;
@@ -210,7 +210,7 @@ public class GeoJsonExporter
         foreach (var state in mapData.States)
         {
             var boundary = boundaryGenerator.GetStateBoundary(state.Id, mapData);
-            
+
             if (config.SimplifyGeometries)
             {
                 boundary = SimplifyGeometry(boundary, config.SimplificationTolerance);
@@ -252,7 +252,7 @@ public class GeoJsonExporter
         foreach (var river in mapData.Rivers)
         {
             var lineString = _adapter.RiverToLineString(river, mapData);
-            
+
             if (config.SimplifyGeometries)
             {
                 lineString = SimplifyGeometry(lineString, config.SimplificationTolerance) as LineString ?? lineString;

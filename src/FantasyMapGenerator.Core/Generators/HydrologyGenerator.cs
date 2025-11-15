@@ -16,6 +16,17 @@ public class HydrologyGenerator
 
     // Flow accumulation: cell ID → upstream cell count
     private readonly Dictionary<int, int> _flowAccumulation;
+    private int _lakesFilled;
+    private int _riverThreshold;
+    private int _sourcesCount;
+    private int _rejectedShort;
+    // Tuning
+    private double _precipScale = 50.0;
+    private int _minFlux = 30;
+    private int _minRiverLength = 3;
+    private bool _autoAdjust = true;
+    private int _targetRivers = 10;
+    private int _minThreshold = 8;
 
     public HydrologyGenerator(MapData map, IRandomSource random)
     {
@@ -23,6 +34,16 @@ public class HydrologyGenerator
         _random = random;
         _flowDirection = new Dictionary<int, int>();
         _flowAccumulation = new Dictionary<int, int>();
+    }
+
+    public void SetOptions(double precipScale, int minFlux, int minRiverLength, bool autoAdjust, int targetRivers, int minThreshold)
+    {
+        _precipScale = precipScale;
+        _minFlux = minFlux;
+        _minRiverLength = Math.Max(1, minRiverLength);
+        _autoAdjust = autoAdjust;
+        _targetRivers = Math.Max(0, targetRivers);
+        _minThreshold = Math.Max(1, minThreshold);
     }
 
     /// <summary>
@@ -56,6 +77,53 @@ public class HydrologyGenerator
         GenerateRiverNames(_random);
 
         Console.WriteLine($"Generated {_map.Rivers.Count} rivers");
+
+        // Build diagnostics report
+        try
+        {
+            var report = new HydrologyReport();
+            report.RiverFormationThreshold = _riverThreshold;
+            report.CandidateSources = _sourcesCount;
+            report.RiversGenerated = _map.Rivers.Count;
+            report.RiversRejectedTooShort = _rejectedShort;
+            report.LakesFilled = _lakesFilled;
+            // Direction assignment stats
+            int land = _map.Cells.Count(c => c.IsLand);
+            int withDownhill = _flowDirection.Count(kv => kv.Value >= 0 && _map.Cells[kv.Key].Height > 0);
+            report.TotalLandCells = land;
+            report.DownhillAssigned = withDownhill;
+
+            // Accumulation quantiles for land cells only
+            var acc = _flowAccumulation
+                .Where(kv => _map.Cells[kv.Key].Height > 0)
+                .Select(kv => kv.Value)
+                .OrderBy(v => v)
+                .ToArray();
+            if (acc.Length > 0)
+            {
+                int Q(double p) => acc[(int)Math.Clamp(Math.Round(p * (acc.Length - 1)), 0, acc.Length - 1)];
+                report.AccumulationQuantiles = new[] { Q(0.05), Q(0.25), Q(0.50), Q(0.75), Q(0.95) };
+            }
+
+            // Top sources (by accumulation)
+            var top = _flowAccumulation
+                .OrderByDescending(kv => kv.Value)
+                .Take(20)
+                .Select(kv => (kv.Key, kv.Value))
+                .ToList();
+            foreach (var (cid, val) in top)
+                report.TopSources.Add((cid, val));
+
+            // Per-river basics
+            foreach (var river in _map.Rivers)
+            {
+                int maxAcc = river.Cells.Select(id => _flowAccumulation.GetValueOrDefault(id, 1)).DefaultIfEmpty(1).Max();
+                report.Rivers.Add((river.Id, river.Cells?.Count ?? 0, maxAcc));
+            }
+
+            _map.Hydrology = report;
+        }
+        catch { }
     }
 
     /// <summary>
@@ -71,7 +139,7 @@ public class HydrologyGenerator
         // Seed with ocean and map border cells
         foreach (var cell in _map.Cells)
         {
-            if (cell.Height == 0 || cell.IsBorder)
+            if (cell.IsOcean || cell.IsBorder)
             {
                 queue.Enqueue(cell.Id, cell.Height);
             }
@@ -114,6 +182,7 @@ public class HydrologyGenerator
         }
 
         Console.WriteLine($"Filled {lakesFilled} pits/lakes");
+        _lakesFilled = lakesFilled;
     }
 
     /// <summary>
@@ -123,7 +192,7 @@ public class HydrologyGenerator
     {
         foreach (var cell in _map.Cells)
         {
-            if (cell.Height == 0)
+            if (cell.IsOcean)
             {
                 // Ocean cells don't flow anywhere
                 _flowDirection[cell.Id] = -1;
@@ -132,6 +201,8 @@ public class HydrologyGenerator
 
             int steepestNeighbor = -1;
             int maxDrop = 0;
+            int minNeighborId = -1;
+            int minNeighborHeight = int.MaxValue;
 
             foreach (var neighborId in cell.Neighbors)
             {
@@ -143,9 +214,45 @@ public class HydrologyGenerator
                     maxDrop = drop;
                     steepestNeighbor = neighborId;
                 }
+
+                if (neighbor.Height < minNeighborHeight)
+                {
+                    minNeighborHeight = neighbor.Height;
+                    minNeighborId = neighborId;
+                }
             }
 
-            _flowDirection[cell.Id] = steepestNeighbor;
+            if (steepestNeighbor >= 0)
+            {
+                _flowDirection[cell.Id] = steepestNeighbor;
+            }
+            else
+            {
+                // Flat or uphill: choose a neighbor that is most likely to lead downhill
+                int fallback = -1;
+                foreach (var neighborId in cell.Neighbors)
+                {
+                    var n = _map.Cells[neighborId];
+                    if (n.Height == cell.Height)
+                    {
+                        // Prefer flats that are adjacent to any lower neighbor
+                        bool leadsDown = false;
+                        foreach (var nnId in n.Neighbors)
+                        {
+                            if (_map.Cells[nnId].Height < n.Height) { leadsDown = true; break; }
+                        }
+                        if (leadsDown) { fallback = neighborId; break; }
+                    }
+                }
+
+                if (fallback < 0)
+                {
+                    // Otherwise pick the overall lowest neighbor
+                    fallback = minNeighborId;
+                }
+
+                _flowDirection[cell.Id] = fallback; // may remain -1 on isolated plateau
+            }
         }
     }
 
@@ -154,10 +261,18 @@ public class HydrologyGenerator
     /// </summary>
     private void CalculateFlowAccumulation()
     {
-        // Initialize all cells with 1 (self)
+        // Initialize base flux from precipitation for land cells, 0 for ocean
         foreach (var cell in _map.Cells)
         {
-            _flowAccumulation[cell.Id] = 1;
+            if (cell.IsLand)
+            {
+                int baseFlux = (int)Math.Max(1, Math.Round(Math.Max(0.0, cell.Precipitation) * _precipScale));
+                _flowAccumulation[cell.Id] = baseFlux;
+            }
+            else
+            {
+                _flowAccumulation[cell.Id] = 0;
+            }
         }
 
         // Process in topological order (highest to lowest)
@@ -168,7 +283,7 @@ public class HydrologyGenerator
             var cell = _map.Cells[cellId];
 
             // Skip ocean cells
-            if (cell.Height == 0)
+            if (cell.IsOcean)
                 continue;
 
             // Get downhill neighbor
@@ -187,7 +302,7 @@ public class HydrologyGenerator
     private List<int> TopologicalSort()
     {
         var sorted = _map.Cells
-            .Where(c => c.Height > 0)
+            .Where(c => c.IsLand)
             .OrderByDescending(c => c.Height)
             .ThenBy(c => c.Id) // Stable sort
             .Select(c => c.Id)
@@ -213,41 +328,54 @@ public class HydrologyGenerator
         // So threshold ~30 in flux units translates to roughly:
         // 30 * modifier / avgPrecipitation ≈ cells needed to accumulate enough water
         // For simplicity, we use a scaled threshold based on cell count
-        const int MIN_FLUX_TO_FORM_RIVER = 30;
-        int threshold = (int)(MIN_FLUX_TO_FORM_RIVER * cellsNumberModifier);
+        int thresholdBase = _minFlux;
+        int threshold = (int)(thresholdBase * cellsNumberModifier);
 
         // Lower bound for very small maps
         threshold = Math.Max(threshold, 10);
 
         Console.WriteLine($"River formation threshold: {threshold} (cells: {_map.Cells.Count}, modifier: {cellsNumberModifier:F2})");
-
-        var visited = new HashSet<int>();
-
-        // Find river sources (high accumulation cells)
-        var riverSources = _flowAccumulation
-            .Where(kvp => kvp.Value >= threshold)
-            .Where(kvp => _map.Cells[kvp.Key].Height > 0) // Not ocean
-            .OrderByDescending(kvp => kvp.Value)
-            .Select(kvp => kvp.Key)
-            .Take(200); // Increased from 100 to allow more rivers
-
-        foreach (var sourceId in riverSources)
+        _riverThreshold = threshold;
+        int attempts = 0;
+        while (true)
         {
-            if (visited.Contains(sourceId))
-                continue;
+            var visited = new HashSet<int>();
+            _map.Rivers.Clear();
+            foreach (var c in _map.Cells) c.HasRiver = false;
 
-            var river = TraceRiver(sourceId, visited);
+            // Find river sources (high accumulation cells)
+            var riverSources = _flowAccumulation
+                .Where(kvp => kvp.Value >= threshold)
+                .Where(kvp => _map.Cells[kvp.Key].IsLand)
+                .OrderByDescending(kvp => kvp.Value)
+                .Select(kvp => kvp.Key)
+                .Take(500);
+            _sourcesCount = riverSources.Count();
 
-            if (river != null && river.Cells.Count >= 3) // Minimum length
+            _rejectedShort = 0;
+            foreach (var sourceId in riverSources)
             {
-                // Mark cells as having river only after accepting the river
-                foreach (var cellId in river.Cells)
+                if (visited.Contains(sourceId)) continue;
+                var river = TraceRiver(sourceId, visited);
+                if (river != null && river.Cells.Count >= _minRiverLength)
                 {
-                    _map.Cells[cellId].HasRiver = true;
+                    foreach (var cellId in river.Cells) _map.Cells[cellId].HasRiver = true;
+                    _map.Rivers.Add(river);
                 }
-                _map.Rivers.Add(river);
+                else
+                {
+                    _rejectedShort++;
+                }
             }
+
+            if (!_autoAdjust) break;
+            if (_map.Rivers.Count >= _targetRivers) break;
+            if (threshold <= _minThreshold) break;
+            threshold = Math.Max(_minThreshold, (int)Math.Floor(threshold * 0.8));
+            attempts++;
+            if (attempts > 5) break;
         }
+        _riverThreshold = threshold;
     }
 
     /// <summary>
@@ -278,7 +406,7 @@ public class HydrologyGenerator
             var cell = _map.Cells[current];
 
             // Stop at ocean
-            if (cell.Height == 0)
+            if (cell.IsOcean)
             {
                 river.Mouth = current;
                 break;
@@ -321,7 +449,7 @@ public class HydrologyGenerator
 
         foreach (var cell in _map.Cells)
         {
-            if (cell.Height == 0 || cell.HasRiver)
+            if (cell.IsOcean || cell.HasRiver)
                 continue;
 
             // Check if surrounded by higher or equal terrain
@@ -613,3 +741,4 @@ public class HydrologyGenerator
         }
     }
 }
+

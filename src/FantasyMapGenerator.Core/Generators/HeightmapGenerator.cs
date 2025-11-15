@@ -1,5 +1,5 @@
-using FantasyMapGenerator.Core.Models;
 using FantasyMapGenerator.Core.Geometry;
+using FantasyMapGenerator.Core.Models;
 using FantasyMapGenerator.Core.Random;
 
 namespace FantasyMapGenerator.Core.Generators;
@@ -14,7 +14,7 @@ public class HeightmapGenerator
     private readonly double _blobPower;
     private readonly double _linePower;
     private byte[] _heights = null!;
-    
+
     public HeightmapGenerator(MapData map)
     {
         _map = map;
@@ -22,7 +22,7 @@ public class HeightmapGenerator
         _linePower = GetLinePower(map.CellsDesired);
         _heights = new byte[map.Cells.Count];
     }
-    
+
     /// <summary>
     /// Generates a heightmap from a template
     /// </summary>
@@ -34,22 +34,23 @@ public class HeightmapGenerator
             throw new ArgumentException($"Unknown heightmap template: {templateId}");
         }
 
-        var steps = template.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var lines = template.Split('\n');
 
-        foreach (var step in steps)
+        foreach (var raw in lines)
         {
-            var elements = step.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (elements.Length < 2)
-            {
-                throw new ArgumentException($"Invalid heightmap step: {step}");
-            }
+            var step = raw.Trim();
+            if (string.IsNullOrWhiteSpace(step)) continue; // ignore blank/whitespace-only lines
+            if (step.StartsWith("#") || step.StartsWith("//") || step.StartsWith(";")) continue; // ignore comments
+
+            var elements = step.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (elements.Length == 0) continue;
 
             ApplyStep(elements, random);
         }
 
         return _heights;
     }
-    
+
     /// <summary>
     /// Generates a random heightmap using noise functions
     /// </summary>
@@ -68,22 +69,22 @@ public class HeightmapGenerator
         {
             _heights[i] = (byte)random.Next(20, 80);
         }
-        
+
         // Apply smoothing
         SmoothHeights(3);
-        
+
         // Add some random peaks
         AddRandomPeaks(5, 90, 100, random);
-        
+
         // Add some random valleys
         AddRandomValleys(3, 0, 20, random);
-        
+
         // Final smoothing
         SmoothHeights(2);
-        
+
         return _heights;
     }
-    
+
     /// <summary>
     /// Applies a single step from a heightmap template
     /// </summary>
@@ -136,7 +137,7 @@ public class HeightmapGenerator
                 throw new ArgumentException($"Unknown heightmap operation: {operation}");
         }
     }
-    
+
     /// <summary>
     /// Adds a blob (circular hill or depression) to the heightmap
     /// </summary>
@@ -146,7 +147,7 @@ public class HeightmapGenerator
         {
             var cell = _map.Cells[i];
             double distance = GeometryUtils.Distance(cell.Center, new Point(x, y));
-            
+
             if (distance <= radius)
             {
                 double factor = 1.0 - Math.Pow(distance / radius, _blobPower);
@@ -155,7 +156,7 @@ public class HeightmapGenerator
             }
         }
     }
-    
+
     /// <summary>
     /// Adds a line (mountain range or ridge) to the heightmap
     /// </summary>
@@ -164,14 +165,14 @@ public class HeightmapGenerator
         var start = new Point(x1, y1);
         var end = new Point(x2, y2);
         double length = GeometryUtils.Distance(start, end);
-        
+
         for (int i = 0; i < _map.Cells.Count; i++)
         {
             var cell = _map.Cells[i];
-            
+
             // Calculate distance from point to line segment
             double distance = DistanceToLineSegment(cell.Center, start, end);
-            
+
             if (distance <= width)
             {
                 // Check if point is within line segment bounds
@@ -185,7 +186,7 @@ public class HeightmapGenerator
             }
         }
     }
-    
+
     /// <summary>
     /// Smooths the heightmap using averaging
     /// </summary>
@@ -194,12 +195,12 @@ public class HeightmapGenerator
         for (int iter = 0; iter < iterations; iter++)
         {
             var newHeights = new byte[_heights.Length];
-            
+
             for (int i = 0; i < _map.Cells.Count; i++)
             {
                 var cell = _map.Cells[i];
                 var neighbors = new List<byte> { _heights[i] };
-                
+
                 foreach (int neighborId in cell.Neighbors)
                 {
                     if (neighborId >= 0 && neighborId < _heights.Length)
@@ -207,14 +208,14 @@ public class HeightmapGenerator
                         neighbors.Add(_heights[neighborId]);
                     }
                 }
-                
+
                 newHeights[i] = (byte)neighbors.Select(n => (double)n).Average();
             }
-            
+
             _heights = newHeights;
         }
     }
-    
+
     /// <summary>
     /// Fills the entire heightmap with a constant value
     /// </summary>
@@ -222,7 +223,7 @@ public class HeightmapGenerator
     {
         Array.Fill(_heights, height);
     }
-    
+
     /// <summary>
     /// Adds random noise to the heightmap
     /// </summary>
@@ -246,11 +247,11 @@ public class HeightmapGenerator
             int cellIndex = random.Next(0, _map.Cells.Count);
             var cell = _map.Cells[cellIndex];
             byte height = (byte)random.Next(minHeight, maxHeight + 1);
-            
+
             AddBlob(cell.Center.X, cell.Center.Y, 20, height);
         }
     }
-    
+
     /// <summary>
     /// Adds random valleys to the heightmap with seeded RNG
     /// </summary>
@@ -261,11 +262,11 @@ public class HeightmapGenerator
             int cellIndex = random.Next(0, _map.Cells.Count);
             var cell = _map.Cells[cellIndex];
             byte height = (byte)random.Next(minHeight, maxHeight + 1);
-            
+
             AddBlob(cell.Center.X, cell.Center.Y, 15, height);
         }
     }
-    
+
     /// <summary>
     /// Calculates distance from a point to a line segment
     /// </summary>
@@ -275,13 +276,13 @@ public class HeightmapGenerator
         double B = point.Y - lineStart.Y;
         double C = lineEnd.X - lineStart.X;
         double D = lineEnd.Y - lineStart.Y;
-        
+
         double dot = A * C + B * D;
         double lenSq = C * C + D * D;
         double param = lenSq != 0 ? dot / lenSq : -1;
-        
+
         double xx, yy;
-        
+
         if (param < 0)
         {
             xx = lineStart.X;
@@ -297,13 +298,13 @@ public class HeightmapGenerator
             xx = lineStart.X + param * C;
             yy = lineStart.Y + param * D;
         }
-        
+
         double dx = point.X - xx;
         double dy = point.Y - yy;
-        
+
         return Math.Sqrt(dx * dx + dy * dy);
     }
-    
+
     /// <summary>
     /// Projects a point onto a line segment
     /// </summary>
@@ -311,14 +312,14 @@ public class HeightmapGenerator
     {
         double dx = lineEnd.X - lineStart.X;
         double dy = lineEnd.Y - lineStart.Y;
-        
+
         if (dx == 0 && dy == 0)
             return 0;
-        
+
         double t = ((point.X - lineStart.X) * dx + (point.Y - lineStart.Y) * dy) / (dx * dx + dy * dy);
         return Math.Clamp(t, 0, 1);
     }
-    
+
     /// <summary>
     /// Gets the blob power based on the number of cells
     /// Port of getBlobPower from original heightmap-generator.js
@@ -433,7 +434,7 @@ public static class HeightmapTemplates
             _ => null
         };
     }
-    
+
     private static string GetArchipelagoTemplate()
     {
         return @"
@@ -449,7 +450,7 @@ public static class HeightmapTemplates
             smooth 1
         ";
     }
-    
+
     private static string GetContinentsTemplate()
     {
         return @"
@@ -464,7 +465,7 @@ public static class HeightmapTemplates
             smooth 2
         ";
     }
-    
+
     private static string GetIslandTemplate()
     {
         return @"
@@ -477,7 +478,7 @@ public static class HeightmapTemplates
             smooth 1
         ";
     }
-    
+
     private static string GetPangeaTemplate()
     {
         return @"
@@ -492,7 +493,7 @@ public static class HeightmapTemplates
             smooth 2
         ";
     }
-    
+
     private static string GetMediterraneanTemplate()
     {
         return @"

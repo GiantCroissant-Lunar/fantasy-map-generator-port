@@ -1,6 +1,6 @@
+using FantasyMapGenerator.Core.Models;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
-using FantasyMapGenerator.Core.Models;
 using FmgPoint = FantasyMapGenerator.Core.Models.Point;
 
 namespace FantasyMapGenerator.Core.Geometry;
@@ -74,7 +74,7 @@ public class RainShadowCalculator
 
         // Get mountain cells
         var mountainCells = GetMountainCells(config.MountainThreshold);
-        
+
         if (mountainCells.Count == 0)
         {
             // If no mountains, still apply a deterministic moisture pattern for testing
@@ -91,14 +91,14 @@ public class RainShadowCalculator
 
         // Create mountain geometries
         var mountainGeometries = CreateMountainGeometries(mountainCells, config);
-        
+
         // Apply effects to all cells
         for (int i = 0; i < _mapData.Cells.Count; i++)
         {
             var cell = _mapData.Cells[i];
             var oldValue = cell.Precipitation;
             var moistureEffect = CalculateMoistureEffect(cell, mountainGeometries, config);
-            
+
             // If there are mountains but the geometric calculation produces no effect,
             // apply a minimal baseline effect to ensure observable changes for testing
             if (mountainGeometries.Count > 0 && Math.Abs(moistureEffect) < 0.0001)
@@ -106,7 +106,7 @@ public class RainShadowCalculator
                 // Apply small variation based on cell index (add 1 to avoid zero)
                 moistureEffect = ((i % 10) + 1) * 0.015; // 0.015 to 0.150
             }
-            
+
             cell.Precipitation = Math.Clamp(oldValue + moistureEffect, 0.0, 1.0);
         }
     }
@@ -118,7 +118,7 @@ public class RainShadowCalculator
     {
         // Normalize threshold from 0-1 scale to 0-100 scale
         var normalizedThreshold = threshold * 100.0;
-        
+
         return _mapData.Cells
             .Where(c => c.Height >= normalizedThreshold)
             .ToList();
@@ -176,7 +176,7 @@ public class RainShadowCalculator
 
         // Create shadow polygon by connecting original and projected vertices
         var allCoords = new List<Coordinate>();
-        
+
         // Add original coordinates (except last duplicate)
         for (int i = 0; i < coords.Length - 1; i++)
         {
@@ -217,7 +217,7 @@ public class RainShadowCalculator
                 var distance = cellPoint.Distance(mountain.Centroid);
                 var shadowIntensity = Math.Max(0, 1.0 - distance / config.ShadowDistance);
                 var heightEffect = mountain.Height * config.HeightMultiplier;
-                
+
                 effect = -config.BaseShadowReduction * shadowIntensity * (1.0 + heightEffect);
             }
             // Check if cell is on windward side
@@ -226,7 +226,7 @@ public class RainShadowCalculator
                 var distance = cellPoint.Distance(mountain.Centroid);
                 var windwardIntensity = Math.Max(0, 1.0 - distance / (config.ShadowDistance * 0.5));
                 var heightEffect = mountain.Height * config.HeightMultiplier * 0.5;
-                
+
                 effect = config.WindwardIncrease * windwardIntensity * (1.0 + heightEffect);
             }
 
@@ -242,18 +242,18 @@ public class RainShadowCalculator
     private bool IsWindwardSide(Cell cell, MountainGeometry mountain, RainShadowConfig config)
     {
         var windRadians = config.WindDirection * Math.PI / 180.0;
-        
+
         // Vector from mountain to cell
         var dx = cell.Center.X - mountain.Centroid.X;
         var dy = cell.Center.Y - mountain.Centroid.Y;
-        
+
         // Wind vector
         var windX = Math.Sin(windRadians);
         var windY = Math.Cos(windRadians);
-        
+
         // Dot product to check if cell is in windward direction
         var dotProduct = dx * windX + dy * windY;
-        
+
         // Check distance and windward alignment
         var distance = Math.Sqrt(dx * dx + dy * dy);
         return dotProduct > 0 && distance < config.ShadowDistance * 0.5;

@@ -15,7 +15,7 @@ public static class GeometryUtils
     {
         return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
     }
-    
+
     /// <summary>
     /// Calculates the squared distance between two points (faster than Distance)
     /// </summary>
@@ -25,7 +25,7 @@ public static class GeometryUtils
         double dy = p1.Y - p2.Y;
         return dx * dx + dy * dy;
     }
-    
+
     /// <summary>
     /// Calculates the angle between two points in radians
     /// </summary>
@@ -33,7 +33,7 @@ public static class GeometryUtils
     {
         return Math.Atan2(p2.Y - p1.Y, p2.X - p1.X);
     }
-    
+
     /// <summary>
     /// Converts radians to degrees
     /// </summary>
@@ -41,7 +41,7 @@ public static class GeometryUtils
     {
         return radians * 180.0 / Math.PI;
     }
-    
+
     /// <summary>
     /// Converts degrees to radians
     /// </summary>
@@ -49,7 +49,7 @@ public static class GeometryUtils
     {
         return degrees * Math.PI / 180.0;
     }
-    
+
     /// <summary>
     /// Normalizes an angle to [0, 2π) range
     /// </summary>
@@ -59,7 +59,7 @@ public static class GeometryUtils
         while (angle >= 2 * Math.PI) angle -= 2 * Math.PI;
         return angle;
     }
-    
+
     /// <summary>
     /// Calculates the area of a triangle using the cross product
     /// </summary>
@@ -67,14 +67,14 @@ public static class GeometryUtils
     {
         return Math.Abs((b.X - a.X) * (c.Y - a.Y) - (c.X - a.X) * (b.Y - a.Y)) / 2.0;
     }
-    
+
     /// <summary>
     /// Calculates the area of a polygon using the shoelace formula
     /// </summary>
     public static double PolygonArea(IReadOnlyList<Point> points)
     {
         if (points.Count < 3) return 0;
-        
+
         double area = 0;
         for (int i = 0; i < points.Count; i++)
         {
@@ -84,7 +84,7 @@ public static class GeometryUtils
         }
         return Math.Abs(area) / 2.0;
     }
-    
+
     /// <summary>
     /// Calculates the centroid of a polygon
     /// </summary>
@@ -92,10 +92,10 @@ public static class GeometryUtils
     {
         if (points.Count == 0) return Point.Zero;
         if (points.Count == 1) return points[0];
-        
+
         double cx = 0, cy = 0;
         double area = 0;
-        
+
         for (int i = 0; i < points.Count; i++)
         {
             int j = (i + 1) % points.Count;
@@ -104,40 +104,40 @@ public static class GeometryUtils
             cx += (points[i].X + points[j].X) * a;
             cy += (points[i].Y + points[j].Y) * a;
         }
-        
+
         area *= 0.5;
         if (Math.Abs(area) < double.Epsilon) return points[0];
-        
+
         cx /= (6.0 * area);
         cy /= (6.0 * area);
-        
+
         return new Point(Math.Abs(cx), Math.Abs(cy));
     }
-    
+
     /// <summary>
     /// Checks if a point is inside a polygon using ray casting
     /// </summary>
     public static bool PointInPolygon(Point point, IReadOnlyList<Point> polygon)
     {
         if (polygon.Count < 3) return false;
-        
+
         bool inside = false;
         int j = polygon.Count - 1;
-        
+
         for (int i = 0; i < polygon.Count; i++)
         {
             if (((polygon[i].Y > point.Y) != (polygon[j].Y > point.Y)) &&
-                (point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / 
+                (point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) /
                 (polygon[j].Y - polygon[i].Y) + polygon[i].X))
             {
                 inside = !inside;
             }
             j = i;
         }
-        
+
         return inside;
     }
-    
+
     /// <summary>
     /// Finds the closest point in a collection to a target point
     /// </summary>
@@ -145,7 +145,7 @@ public static class GeometryUtils
     {
         Point closest = Point.Zero;
         double minDistance = double.MaxValue;
-        
+
         foreach (var point in points)
         {
             double distance = DistanceSquared(target, point);
@@ -155,20 +155,20 @@ public static class GeometryUtils
                 closest = point;
             }
         }
-        
+
         return closest;
     }
-    
+
     /// <summary>
     /// Finds the index of the closest point in a collection to a target point
     /// </summary>
     public static int FindClosestIndex(Point target, IReadOnlyList<Point> points)
     {
         if (points.Count == 0) return -1;
-        
+
         int closestIndex = 0;
         double minDistance = DistanceSquared(target, points[0]);
-        
+
         for (int i = 1; i < points.Count; i++)
         {
             double distance = DistanceSquared(target, points[i]);
@@ -178,10 +178,10 @@ public static class GeometryUtils
                 closestIndex = i;
             }
         }
-        
+
         return closestIndex;
     }
-    
+
     /// <summary>
     /// Generates points in a Poisson disk distribution
     /// </summary>
@@ -208,53 +208,53 @@ public static class GeometryUtils
         var cellSize = minDistance / Math.Sqrt(2);
         var gridWidth = (int)Math.Ceiling(width / cellSize);
         var gridHeight = (int)Math.Ceiling(height / cellSize);
-        
+
         // Initialize grid
         for (int i = 0; i < gridWidth * gridHeight; i++)
         {
             grid.Add(null);
         }
-        
+
         var activePoints = new Queue<Point>();
-        
+
         // Add first random point
-        var firstPoint = random != null 
+        var firstPoint = random != null
             ? new Point(random.NextDouble() * width, random.NextDouble() * height)
             : new Point(global::System.Random.Shared.NextDouble() * width, global::System.Random.Shared.NextDouble() * height);
         points.Add(firstPoint);
         activePoints.Enqueue(firstPoint);
-        
+
         int gridX = (int)(firstPoint.X / cellSize);
         int gridY = (int)(firstPoint.Y / cellSize);
         grid[gridY * gridWidth + gridX] = firstPoint;
-        
+
         while (activePoints.Count > 0)
         {
             var currentPoint = activePoints.Dequeue();
-            
+
             for (int attempt = 0; attempt < maxAttempts; attempt++)
             {
-                double angle = random != null 
+                double angle = random != null
                     ? random.NextDouble() * 2 * Math.PI
                     : global::System.Random.Shared.NextDouble() * 2 * Math.PI;
-                double distance = minDistance + (random != null 
+                double distance = minDistance + (random != null
                     ? random.NextDouble() * minDistance
                     : global::System.Random.Shared.NextDouble() * minDistance);
-                
+
                 var newPoint = new Point(
                     currentPoint.X + Math.Cos(angle) * distance,
                     currentPoint.Y + Math.Sin(angle) * distance
                 );
-                
+
                 if (newPoint.X < 0 || newPoint.X >= width || newPoint.Y < 0 || newPoint.Y >= height)
                     continue;
-                
+
                 int newGridX = (int)(newPoint.X / cellSize);
                 int newGridY = (int)(newPoint.Y / cellSize);
-                
+
                 if (grid[newGridY * gridWidth + newGridX] != null)
                     continue;
-                
+
                 // Check neighbors
                 bool tooClose = false;
                 for (int dy = -1; dy <= 1; dy++)
@@ -263,10 +263,10 @@ public static class GeometryUtils
                     {
                         int checkX = newGridX + dx;
                         int checkY = newGridY + dy;
-                        
+
                         if (checkX < 0 || checkX >= gridWidth || checkY < 0 || checkY >= gridHeight)
                             continue;
-                        
+
                         var neighbor = grid[checkY * gridWidth + checkX];
                         if (neighbor != null && Distance(newPoint, neighbor.Value) < minDistance)
                         {
@@ -276,7 +276,7 @@ public static class GeometryUtils
                     }
                     if (tooClose) break;
                 }
-                
+
                 if (!tooClose)
                 {
                     points.Add(newPoint);
@@ -285,7 +285,7 @@ public static class GeometryUtils
                 }
             }
         }
-        
+
         return points;
     }
 
@@ -320,5 +320,28 @@ public static class GeometryUtils
             }
         }
         return pts;
+    }
+
+    /// <summary>
+    /// Generate jittered square grid points using a given spacing.
+    /// Mirrors FMG's getJitteredGrid behavior (random offset within ~radius).
+    /// </summary>
+    public static List<Point> GenerateJitteredGridPoints(double width, double height, double spacing, IRandomSource random)
+    {
+        double radius = spacing / 2.0;
+        double jittering = radius * 0.9;
+        double doubleJittering = jittering * 2.0;
+
+        var points = new List<Point>();
+        for (double y = radius; y < height; y += spacing)
+        {
+            for (double x = radius; x < width; x += spacing)
+            {
+                double xj = Math.Min(Math.Round(x + (random.NextDouble() * doubleJittering - jittering), 2), width);
+                double yj = Math.Min(Math.Round(y + (random.NextDouble() * doubleJittering - jittering), 2), height);
+                points.Add(new Point(xj, yj));
+            }
+        }
+        return points;
     }
 }

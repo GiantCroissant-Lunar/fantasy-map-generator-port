@@ -1,6 +1,6 @@
+using FantasyMapGenerator.Core.Models;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Simplify;
-using FantasyMapGenerator.Core.Models;
 using NtsGeometry = NetTopologySuite.Geometries.Geometry;
 
 namespace FantasyMapGenerator.Core.Geometry;
@@ -27,7 +27,7 @@ public class BiomeSmoothing
     {
         // Get all cells of this biome
         var biomeCells = map.Cells.Where(c => c.Biome == biomeId).ToList();
-        
+
         if (biomeCells.Count == 0) return;
 
         // Union into single region
@@ -89,7 +89,7 @@ public class BiomeSmoothing
             var biomeArea = biomeCells.Count;
             var totalCells = map.Cells.Count;
             var sizeRatio = (double)biomeArea / totalCells;
-            
+
             // Larger biomes get larger smoothing radius
             var adaptiveRadius = Math.Clamp(baseRadius * Math.Sqrt(sizeRatio) * 10, minRadius, maxRadius);
 
@@ -119,7 +119,7 @@ public class BiomeSmoothing
     public void SmoothCoastlines(MapData map, double smoothRadius)
     {
         // Find coastline cells (land cells adjacent to ocean)
-        var coastlineCells = map.Cells.Where(c => c.IsLand && 
+        var coastlineCells = map.Cells.Where(c => c.IsLand &&
             c.Neighbors.Any(n => n >= 0 && map.Cells[n].IsOcean)).ToList();
 
         if (coastlineCells.Count == 0) return;
@@ -146,7 +146,7 @@ public class BiomeSmoothing
     public void SmoothBiomeBoundariesIterative(MapData map, int biomeId, double smoothRadius, int iterations = 3, double decayFactor = 0.7)
     {
         var currentRadius = smoothRadius;
-        
+
         for (int i = 0; i < iterations; i++)
         {
             SmoothBiomeBoundaries(map, biomeId, currentRadius);
@@ -164,7 +164,7 @@ public class BiomeSmoothing
             // Skip if preserving non-coastal cells and this is not a coastline cell
             if (preserveNonCoastal)
             {
-                var isCoastline = cell.IsLand && 
+                var isCoastline = cell.IsLand &&
                     cell.Neighbors.Any(n => n >= 0 && map.Cells[n].IsOcean);
                 if (!isCoastline) continue;
             }
@@ -205,11 +205,11 @@ public class BiomeSmoothing
     public static bool ValidateSmoothingParameters(MapData map, double smoothRadius)
     {
         if (smoothRadius <= 0) return false;
-        
+
         // Smoothing radius should not be more than 10% of map dimension
         var mapDimension = Math.Sqrt(map.Width * map.Height);
         var maxRadius = mapDimension * 0.1;
-        
+
         return smoothRadius <= maxRadius;
     }
 }

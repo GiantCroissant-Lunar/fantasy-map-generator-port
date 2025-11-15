@@ -1,5 +1,6 @@
-using FantasyMapGenerator.Core.Models;
+using System.Linq;
 using FantasyMapGenerator.Core.Geometry;
+using FantasyMapGenerator.Core.Models;
 using FantasyMapGenerator.Core.Random;
 
 namespace FantasyMapGenerator.Core.Generators;
@@ -12,14 +13,15 @@ public class MapGenerator
     public MapGenerator()
     {
     }
-    
+
     /// <summary>
     /// Generates a complete map based on the provided settings
     /// </summary>
     public MapData Generate(MapGenerationSettings settings)
     {
-        // Create root RNG from seed
+        // Create root RNG from seed and cache seed string for reseeding if needed
         var rootRng = settings.CreateRandom();
+        var seedString = settings.SeedString ?? settings.Seed.ToString();
 
         // Create child RNGs for each subsystem (different streams)
         var terrainRng = CreateChildRng(rootRng, 1);
@@ -28,30 +30,65 @@ public class MapGenerator
         var politicalRng = CreateChildRng(rootRng, 4);
 
         var mapData = new MapData(settings.Width, settings.Height, settings.NumPoints);
-        
-        // Generate random points
-        // settings.NumPoints is a target count, but GeneratePoissonDiskPoints expects a minimum distance.
-        // Use the same scale heuristic as MapData does for cell sizing.
+
+        // Generate random points based on GridMode
         var target = Math.Max(1, settings.NumPoints);
-        var minDistance = Math.Sqrt((double)settings.Width * settings.Height / target);
-        var points = GeometryUtils.GeneratePoissonDiskPoints(settings.Width, settings.Height, minDistance, terrainRng);
-        if (points.Count < target / 5)
+        List<Point> points;
+        switch (settings.GridMode)
         {
-            // Fallback to uniform grid distribution if Poisson produced too few sites
-            points = GeometryUtils.GenerateUniformGridPoints(settings.Width, settings.Height, target, terrainRng);
+            case GridMode.Jittered:
+                {
+                    var spacing = Math.Sqrt((double)settings.Width * settings.Height / target);
+                    points = GeometryUtils.GenerateJitteredGridPoints(settings.Width, settings.Height, spacing, terrainRng);
+                    break;
+                }
+            case GridMode.Poisson:
+            default:
+                {
+                    var minDistance = Math.Sqrt((double)settings.Width * settings.Height / target);
+                    points = GeometryUtils.GeneratePoissonDiskPoints(settings.Width, settings.Height, minDistance, terrainRng);
+                    if (points.Count < target / 5)
+                    {
+                        points = GeometryUtils.GenerateUniformGridPoints(settings.Width, settings.Height, target, terrainRng);
+                    }
+                    break;
+                }
         }
         mapData.Points = points;
-        
+
         // Create simple cells first (needed for heightmap generation)
         mapData.Cells = CreateSimpleCells(points, settings.Width, settings.Height);
-        
+
         // Generate Voronoi diagram to get cell vertices and neighbors
         GenerateVoronoiDiagram(mapData, points, settings.Width, settings.Height);
-        
-        // Generate heightmap using either advanced noise or template system
-        Console.WriteLine($"[MapGen] UseAdvancedNoise: {settings.UseAdvancedNoise}, Template: {settings.HeightmapTemplate ?? "null"}");
+        // Quick diagnostic: overall neighbor stats (pre-height)
+        try
+        {
+            var neighborCountsAll = mapData.Cells.Select(c => c.Neighbors?.Count ?? 0).ToArray();
+            double avgNeighborsAll = neighborCountsAll.Length > 0 ? neighborCountsAll.Average() : 0;
+            int zeroNeighbors = neighborCountsAll.Count(n => n == 0);
+            Console.WriteLine($"[Diag] Voronoi cells: {mapData.Cells.Count}, avg neighbors: {avgNeighborsAll:F2}, zero-neighbor cells: {zeroNeighbors}");
+        }
+        catch { }
 
-        if (settings.UseAdvancedNoise)
+        // Generate heightmap using either advanced noise or template system
+        Console.WriteLine($"[MapGen] UseAdvancedNoise: {settings.UseAdvancedNoise}, Template: {settings.HeightmapTemplate ?? "null"}, HeightmapMode: {settings.HeightmapMode}");
+
+        // Optional reseed before heightmap phase to mimic FMG behavior
+        if (settings.ReseedAtPhaseStart && settings.RNGMode == RNGMode.Alea)
+        {
+            terrainRng = new AleaRandomSource(seedString);
+        }
+
+        bool useNoise = settings.HeightmapMode switch
+        {
+            HeightmapMode.Auto => settings.UseAdvancedNoise,
+            HeightmapMode.Template => false,
+            HeightmapMode.Noise => true,
+            _ => settings.UseAdvancedNoise
+        };
+
+        if (useNoise)
         {
             Console.WriteLine("[MapGen] Using FastNoiseHeightmapGenerator");
             var noiseGenerator = new FastNoiseHeightmapGenerator((int)settings.Seed);
@@ -85,21 +122,55 @@ public class MapGenerator
             var landPercent = (land * 100.0) / mapData.Heights.Length;
             Console.WriteLine($"[MapGen] Old Result - Avg: {avg:F1}, Land: {landPercent:F1}%, Range: {mapData.Heights.Min()}-{mapData.Heights.Max()}");
         }
-        
+
         // Apply heights to cells
         ApplyHeightsToCells(mapData);
-        
+        // Quick diagnostic: land neighbor coverage
+        try
+        {
+            var land = mapData.Cells.Where(c => c.IsLand).ToList();
+            int withNeighbors = land.Count(c => (c.Neighbors?.Count ?? 0) > 0);
+            double avgNeighborsLand = land.Count > 0 ? land.Average(c => c.Neighbors?.Count ?? 0) : 0;
+            Console.WriteLine($"[Diag] Land cells: {land.Count}, with neighbors: {withNeighbors} ({(land.Count > 0 ? withNeighbors * 100.0 / land.Count : 0):F1}%), avg neighbors (land): {avgNeighborsLand:F2}");
+        }
+        catch { }
+
+        // Optional reseed before biomes
+        if (settings.ReseedAtPhaseStart && settings.RNGMode == RNGMode.Alea)
+        {
+            climateRng = new AleaRandomSource(seedString);
+        }
+
         // Generate biomes
         var biomeGenerator = new BiomeGenerator(mapData);
         biomeGenerator.GenerateBiomes(climateRng);
-        
+
         // Generate hydrology (needs terrain + climate)
+        if (settings.ReseedAtPhaseStart && settings.RNGMode == RNGMode.Alea)
+        {
+            hydrologyRng = new AleaRandomSource(seedString);
+        }
         var hydrologyGenerator = new HydrologyGenerator(mapData, hydrologyRng);
+        hydrologyGenerator.SetOptions(
+            settings.HydrologyPrecipScale,
+            settings.HydrologyMinFlux,
+            settings.HydrologyMinRiverLength,
+            settings.HydrologyAutoAdjust,
+            settings.HydrologyTargetRivers,
+            settings.HydrologyMinThreshold);
         hydrologyGenerator.Generate();
-        
+        // Quick diagnostic: rivers summary
+        try
+        {
+            int riverCount = mapData.Rivers?.Count ?? 0;
+            double avgRiverCells = riverCount > 0 ? mapData.Rivers.Average(r => (double)r.Cells.Count) : 0;
+            Console.WriteLine($"[Diag] Rivers: {riverCount}, avg cells per river: {avgRiverCells:F1}");
+        }
+        catch { }
+
         // Generate basic states
         GenerateBasicStates(mapData, settings, politicalRng);
-        
+
         return mapData;
     }
 
@@ -115,18 +186,18 @@ public class MapGenerator
         int childSeed = parent.Next();
         return new SystemRandomSource(childSeed);
     }
-    
+
     private void GenerateVoronoiDiagram(MapData mapData, List<Point> points, int width, int height)
     {
         try
         {
             // Generate Voronoi diagram directly from points using NTS with boundary clipping
             var voronoi = Voronoi.FromPoints(points.ToArray(), points.Count, width, height);
-            
+
             // Update map data with Voronoi vertices
             mapData.Vertices.Clear();
             mapData.Vertices.AddRange(voronoi.Vertices.Coordinates);
-            
+
             // Update cells with their vertices and neighbors
             int cellsWithVertices = 0;
             int cellsWithoutVertices = 0;
@@ -167,7 +238,7 @@ public class MapGenerator
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
     }
-    
+
     private List<Cell> CreateSimpleCells(List<Point> points, int width, int height)
     {
         var cells = new List<Cell>();
@@ -181,21 +252,21 @@ public class MapGenerator
         }
         return cells;
     }
-    
+
     private void ApplyHeightsToCells(MapData mapData)
     {
         if (mapData.Heights == null) return;
-        
+
         for (int i = 0; i < mapData.Cells.Count && i < mapData.Heights.Length; i++)
         {
             mapData.Cells[i].Height = mapData.Heights[i];
         }
     }
-    
+
     private void GenerateBasicStates(MapData mapData, MapGenerationSettings settings, IRandomSource random)
     {
         var landCells = mapData.Cells.Where(c => c.Height > settings.SeaLevel).ToList();
-        
+
         for (int i = 0; i < Math.Min(settings.NumStates, landCells.Count); i++)
         {
             var capitalCell = landCells[random.Next(landCells.Count)];
@@ -207,10 +278,10 @@ public class MapGenerator
                 Culture = i % Math.Max(1, settings.NumCultures),
                 Founded = DateTime.Now.AddDays(-random.Next(100, 1000))
             };
-            
+
             mapData.States.Add(state);
             capitalCell.State = i;
-            
+
             var burg = new Burg(i, capitalCell.Center, capitalCell.Id)
             {
                 Name = state.Name,
@@ -219,11 +290,11 @@ public class MapGenerator
                 Type = BurgType.Capital,
                 IsCapital = true
             };
-            
+
             capitalCell.Burg = burg.Id;
             mapData.Burgs.Add(burg);
         }
-        
+
         // Assign remaining land cells to nearest state
         foreach (var cell in landCells.Where(c => c.State < 0))
         {
@@ -235,12 +306,12 @@ public class MapGenerator
             }
         }
     }
-    
+
     private double Distance(Point a, Point b)
     {
         return Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
     }
-    
+
     private string GenerateRandomColor(IRandomSource random)
     {
         return $"#{random.Next(256):X2}{random.Next(256):X2}{random.Next(256):X2}";
