@@ -158,6 +158,13 @@ public class MapGenerator
             settings.HydrologyAutoAdjust,
             settings.HydrologyTargetRivers,
             settings.HydrologyMinThreshold);
+        hydrologyGenerator.SetMeanderingOptions(
+            settings.EnableRiverMeandering,
+            settings.MeanderingFactor);
+        hydrologyGenerator.SetErosionOptions(
+            settings.EnableRiverErosion,
+            settings.MaxErosionDepth,
+            settings.MinErosionHeight);
         hydrologyGenerator.Generate();
         // Quick diagnostic: rivers summary
         try

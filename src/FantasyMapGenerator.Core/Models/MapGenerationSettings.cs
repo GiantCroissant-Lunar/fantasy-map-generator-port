@@ -150,6 +150,35 @@ public class MapGenerationSettings
     /// </summary>
     public int HydrologyMinThreshold { get; set; } = 8;
 
+    // === River Meandering Settings ===
+
+    /// <summary>
+    /// Enable river meandering path generation
+    /// </summary>
+    public bool EnableRiverMeandering { get; set; } = true;
+
+    /// <summary>
+    /// Base meandering factor (0.0 = straight, 1.0 = very curvy)
+    /// </summary>
+    public double MeanderingFactor { get; set; } = 0.5;
+
+    // === River Erosion Settings ===
+
+    /// <summary>
+    /// Enable river erosion/downcutting
+    /// </summary>
+    public bool EnableRiverErosion { get; set; } = true;
+
+    /// <summary>
+    /// Maximum height a river can erode per cell (1-10)
+    /// </summary>
+    public int MaxErosionDepth { get; set; } = 5;
+
+    /// <summary>
+    /// Minimum height for erosion to occur
+    /// </summary>
+    public int MinErosionHeight { get; set; } = 35;
+
     // === Advanced Noise Settings ===
 
     /// <summary>

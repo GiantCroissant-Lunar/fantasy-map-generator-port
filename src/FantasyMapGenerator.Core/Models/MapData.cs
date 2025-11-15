@@ -272,6 +272,12 @@ public class River
     /// River type based on width and flow
     /// </summary>
     public RiverType Type { get; set; }
+
+    /// <summary>
+    /// Meandered path points for smooth curve rendering.
+    /// External rendering projects use these points to draw natural curves.
+    /// </summary>
+    public List<Point> MeanderedPath { get; set; } = new();
 }
 
 public enum RiverType

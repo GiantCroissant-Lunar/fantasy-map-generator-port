@@ -27,6 +27,11 @@ public class HydrologyGenerator
     private bool _autoAdjust = true;
     private int _targetRivers = 10;
     private int _minThreshold = 8;
+    private bool _enableRiverMeandering = true;
+    private double _meanderingFactor = 0.5;
+    private bool _enableRiverErosion = true;
+    private int _maxErosionDepth = 5;
+    private int _minErosionHeight = 35;
 
     public HydrologyGenerator(MapData map, IRandomSource random)
     {
@@ -44,6 +49,19 @@ public class HydrologyGenerator
         _autoAdjust = autoAdjust;
         _targetRivers = Math.Max(0, targetRivers);
         _minThreshold = Math.Max(1, minThreshold);
+    }
+
+    public void SetMeanderingOptions(bool enableRiverMeandering, double meanderingFactor)
+    {
+        _enableRiverMeandering = enableRiverMeandering;
+        _meanderingFactor = Math.Clamp(meanderingFactor, 0.0, 1.0);
+    }
+
+    public void SetErosionOptions(bool enableRiverErosion, int maxErosionDepth, int minErosionHeight)
+    {
+        _enableRiverErosion = enableRiverErosion;
+        _maxErosionDepth = Math.Clamp(maxErosionDepth, 1, 10);
+        _minErosionHeight = Math.Max(minErosionHeight, 20);
     }
 
     /// <summary>
@@ -71,7 +89,13 @@ public class HydrologyGenerator
         // Step 6: Calculate river widths
         CalculateRiverWidths();
 
-        // Step 7: Generate advanced features
+        // Step 7: Apply river erosion
+        DowncutRivers();
+
+        // Step 8: Add river meandering
+        AddMeanderingToRivers();
+
+        // Step 9: Generate advanced features
         GenerateDeltas();
         IdentifySeasonalRivers();
         GenerateRiverNames(_random);
@@ -739,6 +763,98 @@ public class HydrologyGenerator
                 river.Name = $"{names[random.Next(names.Length)]}{suffixes[random.Next(suffixes.Length)]}";
             }
         }
+    }
+
+    /// <summary>
+    /// Simulates river erosion by downcutting riverbeds.
+    /// Creates valleys and gorges in highland areas based on water flux.
+    /// Based on Azgaar's Fantasy Map Generator downcutRivers algorithm.
+    /// </summary>
+    private void DowncutRivers()
+    {
+        if (!_enableRiverErosion)
+        {
+            Console.WriteLine("River erosion disabled");
+            return;
+        }
+
+        const int SEA_LEVEL = 20;
+
+        int cellsEroded = 0;
+        int totalErosion = 0;
+
+        foreach (var cell in _map.Cells)
+        {
+            // Skip if not a river cell or too low
+            if (!cell.HasRiver || cell.Height < _minErosionHeight)
+                continue;
+
+            // Get flux for this cell
+            if (!_flowAccumulation.TryGetValue(cell.Id, out int flux) || flux == 0)
+                continue;
+
+            // Find higher neighbors (upstream)
+            var higherNeighbors = cell.Neighbors
+                .Where(nId => nId >= 0 && nId < _map.Cells.Count)
+                .Where(nId => _map.Cells[nId].Height > cell.Height)
+                .ToList();
+
+            if (!higherNeighbors.Any())
+                continue;
+
+            // Calculate average flux from higher neighbors
+            double avgHigherFlux = higherNeighbors
+                .Select(nId => _flowAccumulation.GetValueOrDefault(nId, 0))
+                .Where(f => f > 0)
+                .DefaultIfEmpty(1)
+                .Average();
+
+            if (avgHigherFlux == 0)
+                continue;
+
+            // Calculate erosion power
+            double erosionPower = flux / avgHigherFlux;
+            int downcutAmount = (int)Math.Floor(erosionPower);
+
+            if (downcutAmount > 0)
+            {
+                // Apply downcut with limits
+                int actualDowncut = Math.Min(downcutAmount, _maxErosionDepth);
+                int newHeight = Math.Max(cell.Height - actualDowncut, SEA_LEVEL);
+
+                if (newHeight < cell.Height)
+                {
+                    int erosion = cell.Height - newHeight;
+                    cell.Height = (byte)newHeight;
+                    cellsEroded++;
+                    totalErosion += erosion;
+                }
+            }
+        }
+
+        Console.WriteLine($"Eroded {cellsEroded} cells, total erosion: {totalErosion} units (max depth: {_maxErosionDepth}, min height: {_minErosionHeight})");
+    }
+
+    /// <summary>
+    /// Add meandering paths to all rivers for smooth curve rendering.
+    /// Respects configuration settings for enabling/disabling meandering.
+    /// </summary>
+    private void AddMeanderingToRivers()
+    {
+        if (!_enableRiverMeandering)
+        {
+            Console.WriteLine("River meandering disabled");
+            return;
+        }
+
+        var meandering = new RiverMeandering(_map);
+
+        foreach (var river in _map.Rivers)
+        {
+            river.MeanderedPath = meandering.GenerateMeanderedPath(river, _meanderingFactor);
+        }
+
+        Console.WriteLine($"Generated meandering paths for {_map.Rivers.Count} rivers (factor: {_meanderingFactor:F2})");
     }
 }
 
