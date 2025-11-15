@@ -1,0 +1,59 @@
+feat(namegen): Implement Layer 1 - SyllableGenerator foundation
+
+Completed Phase 1, Step 1 of the name generation system.
+
+## What's New
+
+- Created standalone `FantasyNameGenerator` library project
+- Implemented `SyllableGenerator` class (Layer 1 - Foundation)
+- Added comprehensive unit tests (19 tests, all passing)
+
+## SyllableGenerator Features
+
+- Core syllable construction from phoneme patterns
+- Pattern symbols: C (Consonant), V (Vowel), L (Liquid), S (Sibilant), F (Final), ? (Optional)
+- Weighted phoneme selection with configurable exponent
+- Pattern validation and expansion
+- Deterministic generation with seed support
+
+## Test Coverage
+
+- Simple pattern generation (CV, CVC, etc.)
+- Optional phoneme handling (CV?, C?VC)
+- Multiple phoneme types (C, V, L, S, F)
+- Empty/missing phoneme set handling
+- Seed-based determinism
+- Weighted selection bias
+- Pattern validation and expansion
+
+## Architecture
+
+This is the foundation layer that all other layers will build upon:
+```
+┌─────────────────────────────────────────────────────────┐
+│ NameTypes (burg, state, river, religion, culture, army)│
+├─────────────────────────────────────────────────────────┤
+│ GrammarEngine (RimWorld RulePacks concept)              │
+├─────────────────────────────────────────────────────────┤
+│ MorphologyRules (morphemes, word formation)             │
+├─────────────────────────────────────────────────────────┤
+│ PhonotacticRules (conlang-namegen concepts)             │
+├─────────────────────────────────────────────────────────┤
+│ CulturePhonology (libconlang inspired)                  │
+├─────────────────────────────────────────────────────────┤
+│ SyllableGenerator (base layer)                          │ ← DONE
+└─────────────────────────────────────────────────────────┘
+```
+
+## Files Added
+
+- src/FantasyNameGenerator/Core/SyllableGenerator.cs
+- tests/FantasyNameGenerator.Tests/Core/SyllableGeneratorTests.cs
+
+## Next Steps
+
+- Phase 1, Step 2: Implement Layer 2 - CulturePhonology
+- Phase 1, Step 3: Implement Layer 3 - PhonotacticRules
+- Phase 1, Step 4: Implement Layer 4 - MorphologyRules
+
+Related to spec: .kiro/specs/014-name-generation-system.md
