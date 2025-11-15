@@ -293,13 +293,14 @@ public class MapGenerator
         for (int i = 0; i < Math.Min(settings.NumStates, landCells.Count); i++)
         {
             var capitalCell = landCells[random.Next(landCells.Count)];
-            var state = new State(i)
+            var state = new State
             {
+                Id = i,
                 Name = $"State {i + 1}",
-                Capital = capitalCell.Id,
+                CapitalBurgId = capitalCell.Id,
+                CenterCellId = capitalCell.Id,
                 Color = GenerateRandomColor(random),
-                Culture = i % Math.Max(1, settings.NumCultures),
-                Founded = DateTime.Now.AddDays(-random.Next(100, 1000))
+                CultureId = i % Math.Max(1, settings.NumCultures)
             };
 
             mapData.States.Add(state);

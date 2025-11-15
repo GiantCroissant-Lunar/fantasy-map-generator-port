@@ -22,6 +22,31 @@ public class Cell
     public int State { get; set; } = -1;
     public int Province { get; set; } = -1;
     public int Burg { get; set; } = -1; // City/town ID
+    
+    /// <summary>
+    /// State ID (alias for State property)
+    /// </summary>
+    public int StateId { get => State; set => State = value; }
+    
+    /// <summary>
+    /// Biome ID (alias for Biome property)
+    /// </summary>
+    public int BiomeId { get => Biome; set => Biome = value; }
+    
+    /// <summary>
+    /// Feature ID (alias for Feature property)
+    /// </summary>
+    public int FeatureId { get => Feature; set => Feature = value; }
+    
+    /// <summary>
+    /// Culture ID (alias for Culture property)
+    /// </summary>
+    public int CultureId { get => Culture; set => Culture = value; }
+    
+    /// <summary>
+    /// Distance to nearest coast (0 = water, 1 = coastline, 2+ = inland)
+    /// </summary>
+    public int CoastDistance { get; set; }
 
     // Features
     public bool HasRiver { get; set; }

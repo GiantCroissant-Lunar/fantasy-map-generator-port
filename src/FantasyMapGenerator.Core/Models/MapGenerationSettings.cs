@@ -253,6 +253,23 @@ public class MapGenerationSettings
     /// </summary>
     public string DomainWarpType { get; set; } = "OpenSimplex2";
 
+    // === States Settings ===
+    
+    /// <summary>
+    /// Size variety factor (affects expansionism)
+    /// </summary>
+    public double SizeVariety { get; set; } = 1.0;
+    
+    /// <summary>
+    /// Growth rate multiplier
+    /// </summary>
+    public double GrowthRate { get; set; } = 1.0;
+    
+    /// <summary>
+    /// Current year for campaign generation
+    /// </summary>
+    public int CurrentYear { get; set; } = 1000;
+
     /// <summary>
     /// Create RNG instance based on settings
     /// </summary>

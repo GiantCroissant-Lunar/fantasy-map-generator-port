@@ -1,0 +1,52 @@
+feat: Implement Spec 007 - States (Political System)
+
+Implemented the complete political state system including:
+
+Models:
+- Updated State model with new properties (CapitalBurgId, CenterCellId, Pole, Neighbors, etc.)
+- Added StateForm enum (Duchy, Kingdom, Empire, Republic, etc.)
+- Added StateType enum (Generic, Naval, Lake, Highland, River, Nomadic, Hunting)
+- Added DiplomaticStatus enum (Ally, Friendly, Neutral, Rival, Enemy, etc.)
+- Added Campaign model for historical military campaigns
+- Extended Cell model with StateId, BiomeId, FeatureId, CultureId aliases and CoastDistance
+
+Core Implementation:
+- Created StatesGenerator with full state creation and expansion
+- Implemented Dijkstra algorithm for territorial expansion with custom cost functions
+- Added border normalization to clean up irregular territories
+- Implemented diplomacy generation with neighbor relationships
+- Added war declaration system with power balance checks
+- Implemented state form assignment based on size
+- Added statistics collection (area, population, burg count)
+
+Algorithms:
+- State creation from capitals with expansionism factors
+- Dijkstra expansion with culture, population, biome, height, river, and type costs
+- Border normalization to reassign surrounded cells
+- Diplomatic relations based on neighbors and geography
+- War declaration with campaign generation
+
+Helpers:
+- HSL to hex color conversion for state colors
+- Weighted random selection for diplomacy
+- Gaussian distribution for power balance
+- Cost calculation methods for expansion
+
+Tests:
+- Created comprehensive StatesGeneratorTests covering:
+  - State creation from capitals
+  - Capital assignment
+  - Territory expansion
+  - Statistics calculation
+  - Neighbor detection
+  - Diplomacy generation
+  - State form assignment
+  - Color assignment
+  - Expansionism factors
+
+Compatibility:
+- Fixed MapGenerator to use new State model
+- Fixed GeoJsonExporter to use Form instead of Government
+- Added MapGenerationSettings properties (SizeVariety, GrowthRate, CurrentYear)
+
+Status: Spec 007 complete and ready for integration

@@ -224,7 +224,7 @@ public class GeoJsonExporter
                 ["color"] = $"#{state.Color:X6}"
             };
 
-            properties["government"] = state.Government.ToString();
+            properties["government"] = state.Form.ToString();
 
             if (state.Culture >= 0)
                 properties["culture"] = state.Culture;
