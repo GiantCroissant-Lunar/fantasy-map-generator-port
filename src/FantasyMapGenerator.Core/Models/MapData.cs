@@ -296,19 +296,24 @@ public class Route
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public List<int> Cells { get; set; } = new();
-    public int Start { get; set; } = -1;
-    public int End { get; set; } = -1;
     public RouteType Type { get; set; }
+    public int StartBurgId { get; set; }
+    public int EndBurgId { get; set; }
+    public List<int> Path { get; set; } = new(); // Cell IDs
     public double Length { get; set; }
+    public int FeatureId { get; set; } // For sea routes
+    
+    // Legacy properties for compatibility
+    public List<int> Cells { get => Path; set => Path = value; }
+    public int Start { get => StartBurgId; set => StartBurgId = value; }
+    public int End { get => EndBurgId; set => EndBurgId = value; }
 }
 
 public enum RouteType
 {
-    Road,
-    Trail,
-    SeaRoute,
-    TradeRoute
+    Road,       // Major road
+    Trail,      // Minor trail
+    SeaRoute    // Naval route
 }
 
 /// <summary>

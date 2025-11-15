@@ -1,11 +1,12 @@
 # Spec 011: Routes System
 
 ## Status
-- **State:** Not Started
+- **State:** ✅ Complete
 - **Priority:** ⭐⭐⭐ Medium
 - **Estimated Effort:** 1 week
 - **Dependencies:** Burgs (006), States (007)
 - **Blocks:** None (optional feature)
+- **Completed:** November 15, 2025
 
 ## Overview
 
@@ -355,34 +356,34 @@ private void OptimizeRoutes(List<Route> routes)
 ## Implementation Steps
 
 ### Step 1: Models (Day 1)
-- [ ] Create `Route.cs` model
-- [ ] Create `RouteType.cs` enum
-- [ ] Update `MapData.cs`
+- [x] Create `Route.cs` model
+- [x] Create `RouteType.cs` enum
+- [x] Update `MapData.cs`
 
 ### Step 2: Pathfinding (Day 2-3)
-- [ ] Create `RoutesGenerator.cs`
-- [ ] Implement A* pathfinding
-- [ ] Implement cost calculation
+- [x] Create `RoutesGenerator.cs`
+- [x] Implement A* pathfinding
+- [x] Implement cost calculation
 
 ### Step 3: Road Generation (Day 4)
-- [ ] Implement `GenerateRoads()`
-- [ ] Connect burgs within states
-- [ ] Connect nearby burgs
+- [x] Implement `GenerateRoads()`
+- [x] Connect burgs within states
+- [x] Connect nearby burgs
 
 ### Step 4: Sea Routes (Day 5)
-- [ ] Implement `GenerateSeaRoutes()`
-- [ ] Connect ports on same water body
+- [x] Implement `GenerateSeaRoutes()`
+- [x] Connect ports on same water body
 
 ### Step 5: Optimization (Day 6)
-- [ ] Implement `OptimizeRoutes()`
-- [ ] Remove redundant routes
-- [ ] Merge overlapping routes
+- [x] Implement `OptimizeRoutes()`
+- [x] Remove redundant routes
+- [x] Merge overlapping routes
 
 ### Step 6: Integration & Testing (Day 7)
-- [ ] Add to `MapGenerator.cs`
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] Documentation
+- [x] Add to `MapGenerator.cs`
+- [x] Unit tests
+- [x] Integration tests
+- [x] Documentation
 
 ## Configuration
 
@@ -408,12 +409,12 @@ public class MapGenerationSettings
 
 ## Success Criteria
 
-- [ ] Roads connect burgs within states
-- [ ] Sea routes connect ports
-- [ ] Routes follow terrain realistically
-- [ ] Redundant routes removed
-- [ ] All tests passing
-- [ ] Performance < 3 seconds
+- [x] Roads connect burgs within states
+- [x] Sea routes connect ports
+- [x] Routes follow terrain realistically
+- [x] Redundant routes removed
+- [x] All tests passing
+- [x] Performance < 3 seconds
 
 ## Dependencies
 

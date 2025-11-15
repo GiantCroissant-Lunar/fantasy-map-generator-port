@@ -78,6 +78,16 @@ public class MapGenerationSettings
     public bool GenerateRoutes { get; set; } = true;
 
     /// <summary>
+    /// Generate sea routes for naval powers
+    /// </summary>
+    public bool GenerateSeaRoutes { get; set; } = true;
+
+    /// <summary>
+    /// Maximum route length (cells)
+    /// </summary>
+    public int MaxRouteLength { get; set; } = 100;
+
+    /// <summary>
     /// Whether to generate provinces
     /// </summary>
     public bool GenerateProvinces { get; set; } = true;

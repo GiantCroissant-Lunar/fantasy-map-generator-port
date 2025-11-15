@@ -215,6 +215,13 @@ public class MapGenerator
             mapData.Provinces = provincesGenerator.Generate();
         }
 
+        // Generate routes
+        if (settings.GenerateRoutes && mapData.Burgs.Count > 1)
+        {
+            var routesGenerator = new RoutesGenerator(mapData, politicalRng, settings);
+            mapData.Routes = routesGenerator.Generate();
+        }
+
         return mapData;
     }
 
