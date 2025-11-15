@@ -54,6 +54,15 @@ public class MapGenerator
                     break;
                 }
         }
+
+        // Apply Lloyd relaxation if enabled
+        if (settings.ApplyLloydRelaxation && settings.LloydIterations > 0)
+        {
+            Console.WriteLine($"Applying Lloyd relaxation ({settings.LloydIterations} iterations)...");
+            points = GeometryUtils.ApplyLloydRelaxation(points, settings.Width, settings.Height, settings.LloydIterations);
+            Console.WriteLine($"Lloyd relaxation complete");
+        }
+
         mapData.Points = points;
 
         // Create simple cells first (needed for heightmap generation)

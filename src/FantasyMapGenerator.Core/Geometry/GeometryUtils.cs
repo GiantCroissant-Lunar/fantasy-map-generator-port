@@ -344,4 +344,80 @@ public static class GeometryUtils
         }
         return points;
     }
+
+    /// <summary>
+    /// Applies Lloyd relaxation to improve point distribution uniformity.
+    /// Moves points toward their Voronoi cell centroids iteratively.
+    /// 
+    /// Based on Choochoo's C# implementation of the Fantasy Map Generator.
+    /// Reference: https://github.com/Choochoo/FantasyMapGenerator
+    /// Algorithm: Lloyd's algorithm (1982)
+    /// </summary>
+    /// <param name="points">Initial point distribution</param>
+    /// <param name="width">Map width</param>
+    /// <param name="height">Map height</param>
+    /// <param name="iterations">Number of relaxation iterations (1-3 typical)</param>
+    /// <returns>Relaxed point distribution with more uniform cell sizes</returns>
+    public static List<Point> ApplyLloydRelaxation(List<Point> points, int width, int height, int iterations = 1)
+    {
+        if (points == null || points.Count == 0)
+            return points;
+
+        iterations = Math.Clamp(iterations, 1, 10);
+
+        // Work with a copy to avoid modifying the original
+        var relaxedPoints = new List<Point>(points);
+
+        for (int iter = 0; iter < iterations; iter++)
+        {
+            // Generate Voronoi diagram from current points
+            var voronoi = Voronoi.FromPoints(
+                relaxedPoints.ToArray(),
+                relaxedPoints.Count,
+                width,
+                height);
+
+            // Move each point to its cell's centroid
+            for (int i = 0; i < relaxedPoints.Count; i++)
+            {
+                var cell = voronoi.Cells[i];
+                
+                if (cell.Vertices.Count >= 3)
+                {
+                    // Calculate centroid of the Voronoi cell
+                    var centroid = CalculateCentroid(cell.Vertices);
+
+                    // Keep within bounds
+                    centroid = new Point(
+                        Math.Clamp(centroid.X, 0, width),
+                        Math.Clamp(centroid.Y, 0, height)
+                    );
+
+                    relaxedPoints[i] = centroid;
+                }
+                // If cell has < 3 vertices, keep the point where it is
+            }
+        }
+
+        return relaxedPoints;
+    }
+
+    /// <summary>
+    /// Calculates the centroid (geometric center) of a polygon.
+    /// Uses the simple average method for Voronoi cells.
+    /// </summary>
+    private static Point CalculateCentroid(List<Point> vertices)
+    {
+        if (vertices == null || vertices.Count == 0)
+            return Point.Zero;
+
+        if (vertices.Count == 1)
+            return vertices[0];
+
+        // For Voronoi cells, simple average works well
+        double x = vertices.Average(v => v.X);
+        double y = vertices.Average(v => v.Y);
+
+        return new Point(x, y);
+    }
 }

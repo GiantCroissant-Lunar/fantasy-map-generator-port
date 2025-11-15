@@ -113,6 +113,16 @@ public class MapGenerationSettings
     public GridMode GridMode { get; set; } = GridMode.Poisson;
 
     /// <summary>
+    /// Apply Lloyd relaxation to improve point distribution uniformity
+    /// </summary>
+    public bool ApplyLloydRelaxation { get; set; } = false;
+
+    /// <summary>
+    /// Number of Lloyd relaxation iterations (1-3 typical)
+    /// </summary>
+    public int LloydIterations { get; set; } = 1;
+
+    /// <summary>
     /// Heightmap generation mode (Auto defers to UseAdvancedNoise/Template)
     /// </summary>
     public HeightmapMode HeightmapMode { get; set; } = HeightmapMode.Auto;
