@@ -407,7 +407,7 @@ public class MapRenderer : IDisposable
         paint = new SKPaint
         {
             Style = SKPaintStyle.Fill,
-            Color = burg.Type == BurgType.City ? SKColors.Black : SKColors.DarkGray
+            Color = burg.IsCapital ? SKColors.Black : SKColors.DarkGray
         };
         
         _paintCache[key] = paint;
@@ -419,13 +419,16 @@ public class MapRenderer : IDisposable
     /// </summary>
     private static float GetCitySize(Burg burg)
     {
+        // Map new BurgType to sizes
+        if (burg.IsCapital) return 5f;
+        if (burg.IsPort) return 4f;
+        
         return burg.Type switch
         {
-            BurgType.Village => 2f,
-            BurgType.Town => 3f,
-            BurgType.City => 4f,
-            BurgType.Capital => 5f,
-            BurgType.Port => 4f,
+            BurgType.Highland => 3f,
+            BurgType.River => 3.5f,
+            BurgType.Naval => 4f,
+            BurgType.Lake => 3f,
             _ => 3f
         };
     }

@@ -305,12 +305,15 @@ public class MapGenerator
             mapData.States.Add(state);
             capitalCell.State = i;
 
-            var burg = new Burg(i, capitalCell.Center, capitalCell.Id)
+            var burg = new Burg
             {
+                Id = i,
+                Position = capitalCell.Center,
+                CellId = capitalCell.Id,
                 Name = state.Name,
-                State = i,
-                Culture = state.Culture,
-                Type = BurgType.Capital,
+                StateId = i,
+                CultureId = state.Culture,
+                Type = BurgType.Generic,
                 IsCapital = true
             };
 

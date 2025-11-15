@@ -83,11 +83,14 @@ public static class TestRenderer
         // Create some test burgs
         for (int i = 0; i < 10; i++)
         {
-            var burg = new Burg(i, mapData.Points[i], i)
+            var burg = new Burg
             {
+                Id = i,
+                Position = mapData.Points[i],
+                CellId = i,
                 Name = $"City {i + 1}",
                 Population = random.Next(500, 50000),
-                Type = (BurgType)random.Next(0, 5),
+                Type = (BurgType)random.Next(0, 7),
                 IsCapital = i == 0, // First city is capital
                 IsPort = random.Next(0, 2) == 1
             };

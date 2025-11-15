@@ -32,6 +32,31 @@ public class Cell
     public int Population { get; set; }
     public double Temperature { get; set; }
     public double Precipitation { get; set; }
+    
+    /// <summary>
+    /// Harbor quality (0 = none, 1 = good, 2 = excellent)
+    /// </summary>
+    public byte Harbor { get; set; }
+    
+    /// <summary>
+    /// Nearest water cell (for port detection)
+    /// </summary>
+    public int? HavenCell { get; set; }
+    
+    /// <summary>
+    /// River ID if this cell has a river
+    /// </summary>
+    public int RiverId { get; set; } = -1;
+    
+    /// <summary>
+    /// River flux (flow accumulation)
+    /// </summary>
+    public int Flux { get; set; }
+    
+    /// <summary>
+    /// Grid cell ID for temperature/precipitation lookup
+    /// </summary>
+    public int GridCellId { get; set; }
 
     // Routing and connectivity
     public int Road { get; set; } = -1;
