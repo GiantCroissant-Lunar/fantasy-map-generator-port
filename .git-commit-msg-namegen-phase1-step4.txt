@@ -1,0 +1,100 @@
+feat(namegen): Implement Layer 4 - MorphologyRules system
+
+Completed Phase 1, Step 4 - FINAL foundation layer!
+
+## What's New
+
+- Implemented `MorphologyRules` class (Layer 4 - Morphology)
+- Created `Affix` system (prefix, suffix, infix)
+- Added `CompoundingRules` for word combination
+- Built `MorphophonemicRule` for sound changes at boundaries
+- Added comprehensive unit tests (28 new tests, 111 total passing)
+
+## MorphologyRules Features
+
+- **Morpheme Database** - Tracks semantic → phonetic mappings
+- **Affix System** - Prefix, suffix, and infix support with frequency control
+- **Compounding** - Combine words with configurable joiners and head-first/final
+- **Morphophonemic Rules** - Sound changes at morpheme boundaries
+- **Deterministic Generation** - Same seed produces same morphemes
+- **Clone Support** - Create variants with new seeds
+
+## Components
+
+### Affix
+- Form (phonetic shape)
+- Meaning (semantic value)
+- Frequency (0.0-1.0)
+- Position (Prefix/Suffix/Infix)
+
+### CompoundingRules
+- Joiner (space, hyphen, empty)
+- HeadFirst (head-initial vs head-final)
+- CompoundProbability (0.0-1.0)
+- MaxCompoundLength
+
+### MorphophonemicRule
+- Pattern (regex)
+- Replacement
+- Context-aware application
+
+## Test Coverage
+
+- Morpheme creation and reuse
+- Affix application (prefix/suffix)
+- Frequency-based affix selection
+- Compound word formation
+- Joiner variations (space, hyphen)
+- Head-first/head-final ordering
+- Max compound length enforcement
+- Morphophonemic rule application
+- Empty/single word handling
+- Compound probability
+- Clone independence
+- Deterministic generation with seeds
+
+## Architecture - Phase 1 COMPLETE! ✅
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ NameTypes (burg, state, river, religion, culture, army)│
+├─────────────────────────────────────────────────────────┤
+│ GrammarEngine (RimWorld RulePacks concept)              │
+├─────────────────────────────────────────────────────────┤
+│ MorphologyRules (morphemes, word formation)             │ ← DONE ✅
+├─────────────────────────────────────────────────────────┤
+│ PhonotacticRules (conlang-namegen concepts)             │ ✓ DONE
+├─────────────────────────────────────────────────────────┤
+│ CulturePhonology (libconlang inspired)                  │ ✓ DONE
+├─────────────────────────────────────────────────────────┤
+│ SyllableGenerator (base layer)                          │ ✓ DONE
+└─────────────────────────────────────────────────────────┘
+```
+
+## Files Added
+
+- src/FantasyNameGenerator/Morphology/Affix.cs
+- src/FantasyNameGenerator/Morphology/CompoundingRules.cs
+- src/FantasyNameGenerator/Morphology/MorphophonemicRule.cs
+- src/FantasyNameGenerator/Morphology/MorphologyRules.cs
+- tests/FantasyNameGenerator.Tests/Morphology/AffixTests.cs
+- tests/FantasyNameGenerator.Tests/Morphology/CompoundingRulesTests.cs
+- tests/FantasyNameGenerator.Tests/Morphology/MorphophonemicRuleTests.cs
+- tests/FantasyNameGenerator.Tests/Morphology/MorphologyRulesTests.cs
+
+## Phase 1 Summary
+
+**All 4 foundation layers complete!**
+- Layer 1: SyllableGenerator (19 tests)
+- Layer 2: CulturePhonology (28 tests)
+- Layer 3: PhonotacticRules (36 tests)
+- Layer 4: MorphologyRules (28 tests)
+
+**Total: 111 tests passing**
+
+## Next Steps
+
+- Phase 2, Step 5: Implement Layer 5 - GrammarEngine (RimWorld RulePacks)
+- Phase 2, Step 6: Implement Layer 6 - NameTypes API (high-level interface)
+
+Related to spec: .kiro/specs/014-name-generation-system.md
