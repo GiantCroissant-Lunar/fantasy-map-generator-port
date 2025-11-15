@@ -11,7 +11,7 @@ public class Biome
     public int Habitability { get; set; } // 0-100
     public int IconsDensity { get; set; } // Icons per 1000 cells
     public Dictionary<string, int> Icons { get; set; } = new(); // Icon types and weights
-    
+
     // Climate requirements
     public double MinTemperature { get; set; }
     public double MaxTemperature { get; set; }
@@ -19,7 +19,7 @@ public class Biome
     public double MaxPrecipitation { get; set; }
     public byte MinHeight { get; set; }
     public byte MaxHeight { get; set; }
-    
+
     // Properties
     public bool IsWater { get; set; }
     public bool IsLand => !IsWater;
@@ -27,12 +27,12 @@ public class Biome
     public bool IsDesert { get; set; }
     public bool IsCold { get; set; }
     public bool IsHot { get; set; }
-    
+
     public Biome(int id)
     {
         Id = id;
     }
-    
+
     public bool IsSuitable(double temperature, double precipitation, byte height)
     {
         return temperature >= MinTemperature && temperature <= MaxTemperature &&
@@ -56,12 +56,12 @@ public static class BiomeTypes
     public const int Tundra = 10;
     public const int Glacier = 11;
     public const int Wetland = 12;
-    
+
     public static readonly string[] Names = new[]
     {
         "Marine",
         "Hot desert",
-        "Cold desert", 
+        "Cold desert",
         "Savanna",
         "Grassland",
         "Tropical seasonal forest",
@@ -73,7 +73,7 @@ public static class BiomeTypes
         "Glacier",
         "Wetland"
     };
-    
+
     public static readonly string[] Colors = new[]
     {
         "#466eab", // Marine
@@ -90,7 +90,7 @@ public static class BiomeTypes
         "#d5e7eb", // Glacier
         "#0b9131"  // Wetland
     };
-    
+
     public static readonly int[] Habitability = new[]
     {
         0,   // Marine

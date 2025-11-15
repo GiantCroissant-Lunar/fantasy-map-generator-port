@@ -12,29 +12,29 @@ public class Burg
     public int State { get; set; } = -1;
     public int Culture { get; set; } = -1;
     public string? Feature { get; set; } // Special feature description
-    
+
     // Population and type
     public int Population { get; set; }
     public BurgType Type { get; set; }
     public bool IsCapital { get; set; }
     public bool IsPort { get; set; }
-    
+
     // Economic data
     public int Trade { get; set; }
     public int Wealth { get; set; }
-    
+
     // Military
     public int Garrison { get; set; }
     public int Walls { get; set; } // Wall level 0-5
-    
+
     // Religion
     public int Religion { get; set; } = -1;
     public string? Temple { get; set; }
-    
+
     // Coordinates for display
     public double X => Position.X;
     public double Y => Position.Y;
-    
+
     public Burg(int id, Point position, int cell)
     {
         Id = id;
