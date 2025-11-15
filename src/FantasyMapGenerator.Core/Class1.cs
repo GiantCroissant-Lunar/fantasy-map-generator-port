@@ -1,4 +1,4 @@
-﻿namespace FantasyMapGenerator.Core;
+namespace FantasyMapGenerator.Core;
 
 public class Class1
 {
