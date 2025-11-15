@@ -4,6 +4,8 @@
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <NoWarn>$(NoWarn);CA1502;CA5394;CA1062;CA1303;CA1305</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

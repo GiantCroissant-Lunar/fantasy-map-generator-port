@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Description>DEPRECATED: This rendering package is retained for reference only. Use PigeonPea.Map.Rendering (SkiaMapRasterizer, Tiles, etc.) in the main solution.</Description>
+    <PackageReleaseNotes>DEPRECATION NOTICE: FantasyMapGenerator.Rendering has been superseded by the Map domain rendering in the main PigeonPea solution. See docs/migrations/fmg-rendering-to-map-rendering.md for guidance.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
