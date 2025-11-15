@@ -60,7 +60,8 @@ public class HeightmapComparisonTest
         var landCells = map.Heights.Count(h => h > 30); // 30 ≈ 30% sea level
         var landPercent = (landCells * 100.0) / map.Heights.Length;
 
-        Assert.InRange(landPercent, 20, 50);
+        Assert.True(landPercent >= 20 && landPercent <= 50, 
+            $"Land percentage is {landPercent:F1}% (expected 20-50%)");
     }
 
     [Fact]
@@ -139,7 +140,7 @@ public class HeightmapComparisonTest
         // Assert
         Assert.NotNull(map.Heights);
         Assert.Equal(map.Cells.Count, map.Heights.Length);
-        Assert.All(map.Heights, h => Assert.InRange(h, (byte)0, (byte)100));
+        Assert.All(map.Heights, h => Assert.True(h >= 0 && h <= 100, $"Height {h} is not in range [0, 100]"));
     }
 
     [Fact]

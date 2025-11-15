@@ -96,7 +96,7 @@ public class FastNoiseHeightmapGeneratorTests
         // Assert
         Assert.NotNull(heightmap);
         Assert.Equal(mapData.Cells.Count, heightmap.Length);
-        Assert.All(heightmap, h => Assert.InRange(h, (byte)0, (byte)100));
+        Assert.All(heightmap, h => Assert.True(h >= 0 && h <= 100, $"Height {h} is not in range [0, 100]"));
     }
 
     [Fact]
@@ -160,7 +160,7 @@ public class FastNoiseHeightmapGeneratorTests
         // Assert
         Assert.NotNull(heightmap);
         Assert.Equal(mapData.Cells.Count, heightmap.Length);
-        Assert.All(heightmap, h => Assert.InRange(h, (byte)0, (byte)100));
+        Assert.All(heightmap, h => Assert.True(h >= 0 && h <= 100, $"Height {h} is not in range [0, 100]"));
     }
 
     [Theory]
@@ -189,7 +189,7 @@ public class FastNoiseHeightmapGeneratorTests
         // Assert
         Assert.NotNull(heightmap);
         Assert.Equal(mapData.Cells.Count, heightmap.Length);
-        Assert.All(heightmap, h => Assert.InRange(h, (byte)0, (byte)100));
+        Assert.All(heightmap, h => Assert.True(h >= 0 && h <= 100, $"Height {h} is not in range [0, 100]"));
     }
 
     [Theory]
@@ -217,7 +217,7 @@ public class FastNoiseHeightmapGeneratorTests
         // Assert
         Assert.NotNull(heightmap);
         Assert.Equal(mapData.Cells.Count, heightmap.Length);
-        Assert.All(heightmap, h => Assert.InRange(h, (byte)0, (byte)100));
+        Assert.All(heightmap, h => Assert.True(h >= 0 && h <= 100, $"Height {h} is not in range [0, 100]"));
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public class FastNoiseHeightmapGeneratorTests
         // Assert
         Assert.NotNull(heightmap);
         Assert.Equal(mapData.Cells.Count, heightmap.Length);
-        Assert.All(heightmap, h => Assert.InRange(h, (byte)0, (byte)100));
+        Assert.All(heightmap, h => Assert.True(h >= 0 && h <= 100, $"Height {h} is not in range [0, 100]"));
     }
 
     [Fact]

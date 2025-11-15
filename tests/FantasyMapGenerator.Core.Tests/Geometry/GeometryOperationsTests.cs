@@ -242,7 +242,7 @@ public class GeometryOperationsTests
         Assert.True(changes.Any(change => change > 0.01));
         
         // All values should still be in valid range
-        Assert.All(newMoisture, moisture => Assert.InRange(moisture, 0.0, 1.0));
+        Assert.All(newMoisture, moisture => Assert.True(moisture >= 0.0 && moisture <= 1.0, $"Moisture {moisture} is not in range [0.0, 1.0]"));
     }
 
     [Fact]

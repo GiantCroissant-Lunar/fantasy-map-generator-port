@@ -5,8 +5,8 @@ using SkiaSharp;
 namespace FantasyMapGenerator.Core.Tests;
 
 /// <summary>
-/// Simulates exactly what the UI app should be showing
-/// This generates maps with the SAME settings as the UI app
+/// Simulates exactly what UI app should be showing
+/// This generates maps with the SAME settings as UI app
 /// </summary>
 public class UIAppSimulation
 {
@@ -14,10 +14,10 @@ public class UIAppSimulation
     public void GenerateWhatUIAppShouldShow()
     {
         Console.WriteLine("\n=== Simulating UI App Map Generation ===\n");
-        Console.WriteLine("This simulates EXACTLY what the FantasyMapGenerator.UI app should display.");
+        Console.WriteLine("This simulates EXACTLY what FantasyMapGenerator.UI app should display.");
         Console.WriteLine("Using the SAME settings from MapControlViewModel.cs\n");
 
-        // These are the EXACT settings from MapControlViewModel.cs lines 51-60
+        // These are EXACT settings from MapControlViewModel.cs lines 51-60
         var settings = new MapGenerationSettings
         {
             Width = 800,
@@ -68,7 +68,7 @@ public class UIAppSimulation
         Assert.True(stats.WaterPercent > 50,
             $"FastNoiseLite 'island' profile should create mostly water (>50%), but got {stats.WaterPercent:F1}%");
 
-        Assert.InRange(stats.LandPercent, 20, 45,
+        Assert.True(stats.LandPercent >= 20 && stats.LandPercent <= 45,
             $"FastNoiseLite 'island' profile should create 20-45% land, but got {stats.LandPercent:F1}%");
 
         Console.WriteLine("✅ VERIFIED: The map is using FastNoiseLite correctly!");

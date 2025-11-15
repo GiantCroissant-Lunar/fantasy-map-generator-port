@@ -17,7 +17,7 @@ public class ReproducibilityTests
             Width = 1000,
             Height = 1000,
             NumPoints = 1000,
-            RandomAlgorithm = "PCG"
+            RNGMode = RNGMode.PCG
         };
 
         var generator = new MapGenerator();
@@ -47,7 +47,7 @@ public class ReproducibilityTests
             Width = 1000,
             Height = 1000,
             NumPoints = 1000,
-            RandomAlgorithm = "System"
+            RNGMode = RNGMode.System
         };
 
         var generator = new MapGenerator();
@@ -71,8 +71,8 @@ public class ReproducibilityTests
     [Fact]
     public void DifferentSeeds_ProduceDifferentMaps()
     {
-        var settings1 = new MapGenerationSettings { Seed = 111, RandomAlgorithm = "PCG" };
-        var settings2 = new MapGenerationSettings { Seed = 222, RandomAlgorithm = "PCG" };
+        var settings1 = new MapGenerationSettings { Seed = 111, RNGMode = RNGMode.PCG };
+        var settings2 = new MapGenerationSettings { Seed = 222, RNGMode = RNGMode.PCG };
 
         var generator1 = new MapGenerator();
         var generator2 = new MapGenerator();
@@ -178,8 +178,8 @@ public class ReproducibilityTests
     [Fact]
     public void MapGenerationSettings_CreatesCorrectRng()
     {
-        var pcgSettings = new MapGenerationSettings { Seed = 123, RandomAlgorithm = "PCG" };
-        var systemSettings = new MapGenerationSettings { Seed = 123, RandomAlgorithm = "System" };
+        var pcgSettings = new MapGenerationSettings { Seed = 123, RNGMode = RNGMode.PCG };
+        var systemSettings = new MapGenerationSettings { Seed = 123, RNGMode = RNGMode.System };
         var defaultSettings = new MapGenerationSettings { Seed = 123 }; // Should default to PCG
 
         var pcgRng = pcgSettings.CreateRandom();
@@ -234,7 +234,7 @@ public class ReproducibilityTests
     {
         var mapData = new MapData(100, 100, 100);
         
-        // Create some test points and cells so the heightmap generator works
+        // Create some test points and cells so that heightmap generator works
         var points = new List<Point>();
         for (int i = 0; i < 100; i++)
         {
