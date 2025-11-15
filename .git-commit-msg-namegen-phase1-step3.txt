@@ -1,0 +1,77 @@
+feat(namegen): Implement Layer 3 - PhonotacticRules system
+
+Completed Phase 1, Step 3 of the name generation system.
+
+## What's New
+
+- Implemented `PhonotacticRules` class (Layer 3 - Phonotactics)
+- Created `PhonotacticTemplates` with 6 predefined rule sets
+- Added comprehensive unit tests (36 new tests, 83 total passing)
+
+## PhonotacticRules Features
+
+- Syllable structure validation (CV, CVC, CCVC, etc.)
+- Forbidden sequence checking (regex-based)
+- Consonant cluster constraints (max size)
+- Vowel cluster constraints (diphthongs, triphthongs)
+- Onset/coda cluster validation
+- Sonority sequencing enforcement
+- Syllable count constraints (min/max)
+- Random structure selection
+- Clone support for rule variants
+
+## Phonotactic Templates
+
+Built-in rule sets for each language type:
+
+1. **Germanic** - Complex clusters (3+ consonants), "st", "str" onsets
+2. **Romance** - Simple, open syllables, CV preference
+3. **Slavic** - Very complex clusters (4+ consonants), violates sonority
+4. **Elvish** - Simple, flowing (max 1 consonant cluster)
+5. **Dwarvish** - Harsh, guttural, forbids soft sounds
+6. **Orcish** - Simple, brutal, short words (1-2 syllables)
+
+## Test Coverage
+
+- Syllable validation (valid/invalid)
+- Word validation
+- Forbidden sequence detection
+- Consonant/vowel cluster checking
+- Empty/null input handling
+- Invalid regex pattern handling
+- Random structure selection (deterministic with seeds)
+- Clone independence
+- All 6 template validations
+- Template consistency checks
+
+## Architecture Progress
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ NameTypes (burg, state, river, religion, culture, army)│
+├─────────────────────────────────────────────────────────┤
+│ GrammarEngine (RimWorld RulePacks concept)              │
+├─────────────────────────────────────────────────────────┤
+│ MorphologyRules (morphemes, word formation)             │
+├─────────────────────────────────────────────────────────┤
+│ PhonotacticRules (conlang-namegen concepts)             │ ← DONE
+├─────────────────────────────────────────────────────────┤
+│ CulturePhonology (libconlang inspired)                  │ ✓ DONE
+├─────────────────────────────────────────────────────────┤
+│ SyllableGenerator (base layer)                          │ ✓ DONE
+└─────────────────────────────────────────────────────────┘
+```
+
+## Files Added
+
+- src/FantasyNameGenerator/Phonotactics/PhonotacticRules.cs
+- src/FantasyNameGenerator/Phonotactics/PhonotacticTemplates.cs
+- tests/FantasyNameGenerator.Tests/Phonotactics/PhonotacticRulesTests.cs
+- tests/FantasyNameGenerator.Tests/Phonotactics/PhonotacticTemplatesTests.cs
+
+## Next Steps
+
+- Phase 1, Step 4: Implement Layer 4 - MorphologyRules (final foundation layer)
+- Phase 2: Grammar & API layers
+
+Related to spec: .kiro/specs/014-name-generation-system.md
