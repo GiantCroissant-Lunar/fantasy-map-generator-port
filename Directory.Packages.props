@@ -29,5 +29,9 @@
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <!-- Property-Based Testing Dependencies -->
+    <PackageVersion Include="Expecto" Version="10.2.1" />
+    <PackageVersion Include="FsCheck" Version="2.16.6" />
+    <PackageVersion Include="Expecto.FsCheck" Version="10.2.1" />
   </ItemGroup>
 </Project>

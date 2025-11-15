@@ -38,6 +38,9 @@ public class MapData
     // Provinces
     public List<Province> Provinces { get; set; } = new();
 
+    // Military
+    public List<MilitaryUnit> MilitaryUnits { get; set; } = new();
+
     // Names and labels
     public NamesBase Names { get; set; } = new();
 
@@ -394,6 +397,41 @@ public class Dungeon
     public int Height { get; set; } = 32;
     public bool[,] Cells { get; set; } = new bool[0, 0]; // true = floor, false = wall
     public int? AnchorCellId { get; set; }
+}
+
+/// <summary>
+/// Represents a military unit
+/// </summary>
+public class MilitaryUnit
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int StateId { get; set; }
+    public int CellId { get; set; }
+    public Point Position { get; set; }
+    public UnitType Type { get; set; }
+    public int Strength { get; set; }
+    public UnitStatus Status { get; set; }
+    public int? GarrisonBurgId { get; set; }
+}
+
+public enum UnitType
+{
+    Infantry,
+    Cavalry,
+    Archers,
+    Navy,
+    Siege,
+    Artillery,
+    Militia
+}
+
+public enum UnitStatus
+{
+    Garrison,   // Defending a burg
+    Field,      // Active field army
+    Reserve,    // In reserve
+    Patrol      // Patrolling borders
 }
 
 /// <summary>

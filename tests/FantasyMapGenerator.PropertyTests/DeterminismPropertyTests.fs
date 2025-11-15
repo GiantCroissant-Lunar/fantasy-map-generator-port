@@ -2,22 +2,21 @@ module DeterminismPropertyTests
 
 open Expecto
 open FsCheck
-open FantasyMapGenerator.Core
 open FantasyMapGenerator.Core.Generators
-open System.Linq
+open FantasyMapGenerator.Core.Models
 
 /// Helper to create a deterministic hash of map state
-let mapToHash (map: Map) =
+let mapToHash (mapData: MapData) =
     let cellHash = 
-        map.Cells
-        |> Seq.take (min 100 map.Cells.Count)
-        |> Seq.map (fun c -> (c.Index, c.Height, c.Water, c.Biome))
+        mapData.Cells
+        |> Seq.take (min 100 mapData.Cells.Count)
+        |> Seq.map (fun c -> (c.Id, c.Height, c.Biome))
         |> Seq.toArray
         |> fun arr -> arr.GetHashCode()
     
     let riverHash =
-        map.Rivers
-        |> Seq.take (min 10 map.Rivers.Count)
+        mapData.Rivers
+        |> Seq.take (min 10 mapData.Rivers.Count)
         |> Seq.map (fun r -> (r.Id, r.Cells.Count, r.Type))
         |> Seq.toArray
         |> fun arr -> arr.GetHashCode()
@@ -26,14 +25,13 @@ let mapToHash (map: Map) =
 
 /// Property: Same seed produces identical maps
 let mapGenerationIsDeterministic (seed: int) =
-    let config1 = MapGeneratorConfig(Seed = seed, Width = 800, Height = 600)
-    let config2 = MapGeneratorConfig(Seed = seed, Width = 800, Height = 600)
+    let settings1 = MapGenerationSettings(Seed = seed, Width = 800, Height = 600, NumPoints = 1000)
+    let settings2 = MapGenerationSettings(Seed = seed, Width = 800, Height = 600, NumPoints = 1000)
     
-    let generator1 = MapGenerator(config1)
-    let generator2 = MapGenerator(config2)
+    let generator = MapGenerator()
     
-    let map1 = generator1.Generate()
-    let map2 = generator2.Generate()
+    let map1 = generator.Generate(settings1)
+    let map2 = generator.Generate(settings2)
     
     let hash1 = mapToHash map1
     let hash2 = mapToHash map2
@@ -44,14 +42,13 @@ let mapGenerationIsDeterministic (seed: int) =
 let differentSeedsProduceDifferentMaps (seed1: int, seed2: int) =
     if seed1 = seed2 then true
     else
-        let config1 = MapGeneratorConfig(Seed = seed1, Width = 800, Height = 600)
-        let config2 = MapGeneratorConfig(Seed = seed2, Width = 800, Height = 600)
+        let settings1 = MapGenerationSettings(Seed = seed1, Width = 800, Height = 600, NumPoints = 1000)
+        let settings2 = MapGenerationSettings(Seed = seed2, Width = 800, Height = 600, NumPoints = 1000)
         
-        let generator1 = MapGenerator(config1)
-        let generator2 = MapGenerator(config2)
+        let generator = MapGenerator()
         
-        let map1 = generator1.Generate()
-        let map2 = generator2.Generate()
+        let map1 = generator.Generate(settings1)
+        let map2 = generator.Generate(settings2)
         
         let hash1 = mapToHash map1
         let hash2 = mapToHash map2
@@ -60,11 +57,11 @@ let differentSeedsProduceDifferentMaps (seed1: int, seed2: int) =
 
 /// Property: Cell count remains constant
 let cellCountIsConstant (seed: int) =
-    let config = MapGeneratorConfig(Seed = seed, Width = 800, Height = 600)
-    let generator = MapGenerator(config)
-    let map = generator.Generate()
+    let settings = MapGenerationSettings(Seed = seed, Width = 800, Height = 600, NumPoints = 1000)
+    let generator = MapGenerator()
+    let mapData = generator.Generate(settings)
     
-    map.Cells.Count > 0 && map.Cells.Count < 100000
+    mapData.Cells.Count > 0 && mapData.Cells.Count < 100000
 
 [<Tests>]
 let determinismTests =

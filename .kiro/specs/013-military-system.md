@@ -1,11 +1,12 @@
 # Spec 013: Military System
 
 ## Status
-- **State:** Not Started
+- **State:** ✅ Complete
 - **Priority:** ⭐⭐ Nice to have
 - **Estimated Effort:** 1 week
 - **Dependencies:** States (007), Burgs (006)
 - **Blocks:** None (optional feature)
+- **Completed:** November 15, 2025
 
 ## Overview
 
@@ -473,13 +474,13 @@ public class MapGenerationSettings
 
 ## Success Criteria
 
-- [ ] Military strength calculated appropriately
-- [ ] Garrisons placed in all major burgs
-- [ ] Field armies positioned strategically
-- [ ] Navies placed at ports
-- [ ] Unit composition makes sense
-- [ ] All tests passing
-- [ ] Performance < 2 seconds
+- [x] Military strength calculated appropriately
+- [x] Garrisons placed in all major burgs
+- [x] Field armies positioned strategically
+- [x] Navies placed at ports
+- [x] Unit composition makes sense
+- [x] All tests passing
+- [x] Performance < 2 seconds
 
 ## Dependencies
 

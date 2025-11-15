@@ -229,6 +229,13 @@ public class MapGenerator
             mapData.Markers = markersGenerator.Generate();
         }
 
+        // Generate military
+        if (settings.GenerateMilitary && mapData.States.Count > 1)
+        {
+            var militaryGenerator = new MilitaryGenerator(mapData, politicalRng, settings);
+            mapData.MilitaryUnits = militaryGenerator.Generate();
+        }
+
         return mapData;
     }
 

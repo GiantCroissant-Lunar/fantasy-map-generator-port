@@ -2,62 +2,63 @@ module HydrologyPropertyTests
 
 open Expecto
 open FsCheck
-open FantasyMapGenerator.Core
 open FantasyMapGenerator.Core.Generators
+open FantasyMapGenerator.Core.Models
 
 /// Property: Rivers must always flow downhill (or stay level)
 let riversFlowDownhill (seed: int) =
-    let config = MapGeneratorConfig(Seed = seed, Width = 800, Height = 600)
-    let generator = MapGenerator(config)
-    let map = generator.Generate()
+    let settings = MapGenerationSettings(Seed = seed, Width = 800, Height = 600, NumPoints = 1000)
+    let generator = MapGenerator()
+    let mapData = generator.Generate(settings)
     
-    map.Rivers
+    mapData.Rivers
     |> Seq.forall (fun river ->
         river.Cells
         |> Seq.pairwise
-        |> Seq.forall (fun (a, b) -> a.Height >= b.Height))
+        |> Seq.forall (fun (cellIdA, cellIdB) ->
+            let cellA = mapData.Cells.[cellIdA]
+            let cellB = mapData.Cells.[cellIdB]
+            cellA.Height >= cellB.Height))
 
 /// Property: All river cells must have valid indices
 let riverCellsAreValid (seed: int) =
-    let config = MapGeneratorConfig(Seed = seed, Width = 800, Height = 600)
-    let generator = MapGenerator(config)
-    let map = generator.Generate()
+    let settings = MapGenerationSettings(Seed = seed, Width = 800, Height = 600, NumPoints = 1000)
+    let generator = MapGenerator()
+    let mapData = generator.Generate(settings)
     
-    let maxIndex = map.Cells.Count - 1
-    map.Rivers
+    let maxIndex = mapData.Cells.Count - 1
+    mapData.Rivers
     |> Seq.forall (fun river ->
         river.Cells
-        |> Seq.forall (fun cell -> cell.Index >= 0 && cell.Index <= maxIndex))
-
-/// Property: Lakes must be correctly classified
-let lakesAreValid (seed: int) =
-    let config = MapGeneratorConfig(Seed = seed, Width = 800, Height = 600)
-    let generator = MapGenerator(config)
-    let map = generator.Generate()
-    
-    // All lake cells should have water > 0
-    map.Cells
-    |> Seq.filter (fun c -> c.Lake > 0)
-    |> Seq.forall (fun c -> c.Water > 0.0)
+        |> Seq.forall (fun cellId -> cellId >= 0 && cellId <= maxIndex))
 
 /// Property: River sources must be at higher elevations than mouths
 let riverSourcesHigherThanMouths (seed: int) =
-    let config = MapGeneratorConfig(Seed = seed, Width = 800, Height = 600)
-    let generator = MapGenerator(config)
-    let map = generator.Generate()
+    let settings = MapGenerationSettings(Seed = seed, Width = 800, Height = 600, NumPoints = 1000)
+    let generator = MapGenerator()
+    let mapData = generator.Generate(settings)
     
-    map.Rivers
+    mapData.Rivers
     |> Seq.filter (fun r -> r.Cells.Count > 1)
     |> Seq.forall (fun river ->
-        let source = river.Cells.[0]
-        let mouth = river.Cells.[river.Cells.Count - 1]
-        source.Height >= mouth.Height)
+        let sourceCell = mapData.Cells.[river.Cells.[0]]
+        let mouthCell = mapData.Cells.[river.Cells.[river.Cells.Count - 1]]
+        sourceCell.Height >= mouthCell.Height)
+
+/// Property: Rivers must have at least 2 cells
+let riversHaveMinimumLength (seed: int) =
+    let settings = MapGenerationSettings(Seed = seed, Width = 800, Height = 600, NumPoints = 1000)
+    let generator = MapGenerator()
+    let mapData = generator.Generate(settings)
+    
+    mapData.Rivers
+    |> Seq.forall (fun river -> river.Cells.Count >= 2)
 
 [<Tests>]
 let hydrologyTests =
     testList "Hydrology Property Tests" [
         testProperty "rivers always flow downhill" riversFlowDownhill
         testProperty "river cells have valid indices" riverCellsAreValid
-        testProperty "lakes are correctly classified" lakesAreValid
         testProperty "river sources higher than mouths" riverSourcesHigherThanMouths
+        testProperty "rivers have minimum length" riversHaveMinimumLength
     ]

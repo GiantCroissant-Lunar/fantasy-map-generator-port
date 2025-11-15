@@ -123,6 +123,31 @@ public class MapGenerationSettings
     public bool GenerateDangerousMarkers { get; set; } = true;
 
     /// <summary>
+    /// Enable military unit generation
+    /// </summary>
+    public bool GenerateMilitary { get; set; } = true;
+
+    /// <summary>
+    /// Military participation rate (percentage of population)
+    /// </summary>
+    public double MilitaryParticipationRate { get; set; } = 0.02; // 2%
+
+    /// <summary>
+    /// Garrison percentage (of total military)
+    /// </summary>
+    public double GarrisonPercentage { get; set; } = 0.3; // 30%
+
+    /// <summary>
+    /// Field army percentage (of total military)
+    /// </summary>
+    public double FieldArmyPercentage { get; set; } = 0.5; // 50%
+
+    /// <summary>
+    /// Naval percentage (of total military)
+    /// </summary>
+    public double NavalPercentage { get; set; } = 0.2; // 20%
+
+    /// <summary>
     /// Minimum burgs per province
     /// </summary>
     public int MinBurgsPerProvince { get; set; } = 3;
