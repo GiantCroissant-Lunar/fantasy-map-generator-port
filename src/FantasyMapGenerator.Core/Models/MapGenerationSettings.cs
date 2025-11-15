@@ -83,6 +83,11 @@ public class MapGenerationSettings
     public bool GenerateProvinces { get; set; } = true;
 
     /// <summary>
+    /// Minimum burgs per province
+    /// </summary>
+    public int MinBurgsPerProvince { get; set; } = 3;
+
+    /// <summary>
     /// Map name template
     /// </summary>
     public string MapNameTemplate { get; set; } = "Fantasy Map";

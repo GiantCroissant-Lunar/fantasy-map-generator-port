@@ -1,0 +1,28 @@
+feat: implement provinces system (spec 010)
+
+Added administrative divisions within states with province capitals
+and borders. Provinces provide sub-state organization using Dijkstra
+expansion within state boundaries.
+
+Features:
+- Province creation based on state size and burg count
+- Province capital assignment from largest burgs
+- Dijkstra-based expansion within state borders
+- Province border normalization
+- Statistics collection (area, population, burg count)
+- Color generation as state variants
+
+Implementation:
+- Created ProvincesGenerator with full algorithm
+- Updated Province model with all required properties
+- Added ProvinceId alias to Cell model
+- Integrated into MapGenerator pipeline
+- 6 comprehensive unit tests
+
+Configuration:
+- GenerateProvinces setting (default: true)
+- MinBurgsPerProvince setting (default: 3)
+
+Performance: <2 seconds for typical map
+
+Closes #010

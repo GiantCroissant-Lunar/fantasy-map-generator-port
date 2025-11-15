@@ -44,6 +44,11 @@ public class Cell
     public int CultureId { get => Culture; set => Culture = value; }
     
     /// <summary>
+    /// Province ID (alias for Province property)
+    /// </summary>
+    public int ProvinceId { get => Province; set => Province = value; }
+    
+    /// <summary>
     /// Distance to nearest coast (0 = water, 1 = coastline, 2+ = inland)
     /// </summary>
     public int CoastDistance { get; set; }

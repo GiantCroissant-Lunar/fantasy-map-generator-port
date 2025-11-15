@@ -367,11 +367,23 @@ public class Province
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int State { get; set; } = -1;
-    public int Capital { get; set; } = -1;
-    public List<int> Cells { get; set; } = new();
+    public int StateId { get; set; } = -1;
+    public int CapitalBurgId { get; set; } = -1;
+    public int CenterCellId { get; set; }
     public string Color { get; set; } = "#000000";
-    public int Population { get; set; }
+    
+    // Statistics
+    public int CellCount { get; set; }
+    public double Area { get; set; }
+    public double RuralPopulation { get; set; }
+    public double UrbanPopulation { get; set; }
+    public int BurgCount { get; set; }
+    
+    // Legacy properties for compatibility
+    public int State { get => StateId; set => StateId = value; }
+    public int Capital { get => CapitalBurgId; set => CapitalBurgId = value; }
+    public List<int> Cells { get; set; } = new();
+    public int Population { get => (int)(RuralPopulation + UrbanPopulation); set { } }
 }
 
 /// <summary>

@@ -208,6 +208,13 @@ public class MapGenerator
             mapData.Religions = religionsGenerator.Generate();
         }
 
+        // Generate provinces
+        if (settings.GenerateProvinces && mapData.States.Count > 1 && mapData.Burgs.Count > 0)
+        {
+            var provincesGenerator = new ProvincesGenerator(mapData, politicalRng, settings);
+            mapData.Provinces = provincesGenerator.Generate();
+        }
+
         return mapData;
     }
 
