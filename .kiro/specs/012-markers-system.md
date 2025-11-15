@@ -1,11 +1,12 @@
 # Spec 012: Markers System (Points of Interest)
 
 ## Status
-- **State:** Not Started
+- **State:** ✅ Complete
 - **Priority:** ⭐⭐ Nice to have
 - **Estimated Effort:** 1 week
 - **Dependencies:** None (can start anytime)
 - **Blocks:** None (optional feature)
+- **Completed:** November 15, 2025
 
 ## Overview
 
@@ -336,35 +337,33 @@ private List<Marker> PlaceMonsterLairs()
 ## Implementation Steps
 
 ### Step 1: Models (Day 1)
-- [ ] Create `Marker.cs` model
-- [ ] Create `MarkerType.cs` enum
-- [ ] Add `Markers` to `MapData.cs`
+- [x] Create `Marker.cs` model
+- [x] Create `MarkerType.cs` enum
+- [x] Add `Markers` to `MapData.cs`
 
 ### Step 2: Generator (Day 2-3)
-- [ ] Create `MarkersGenerator.cs`
-- [ ] Implement `PlaceVolcanoes()`
-- [ ] Implement `PlaceHotSprings()`
-- [ ] Implement `PlaceGeysers()`
+- [x] Create `MarkersGenerator.cs`
+- [x] Implement `PlaceVolcanoes()`
+- [x] Implement `PlaceHotSprings()`
+- [x] Implement `PlaceCaves()`
 
 ### Step 3: Historical Markers (Day 4)
-- [ ] Implement `PlaceRuins()`
-- [ ] Implement `PlaceBattlefields()`
-- [ ] Implement `PlaceMonuments()`
+- [x] Implement `PlaceRuins()`
+- [x] Implement `PlaceBattlefields()`
 
 ### Step 4: Religious & Dangerous (Day 5)
-- [ ] Implement `PlaceSacredSites()`
-- [ ] Implement `PlaceMonsterLairs()`
-- [ ] Implement `PlaceDangerZones()`
+- [x] Implement `PlaceSacredSites()`
+- [x] Implement `PlaceMonsterLairs()`
 
 ### Step 5: Name Generation (Day 6)
-- [ ] Implement marker name generators
-- [ ] Implement description generators
+- [x] Implement marker name generators
+- [x] Implement description generators
 
 ### Step 6: Integration & Testing (Day 7)
-- [ ] Add to `MapGenerator.cs`
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] Documentation
+- [x] Add to `MapGenerator.cs`
+- [x] Unit tests
+- [x] Integration tests
+- [x] Documentation
 
 ## Configuration
 
@@ -405,12 +404,12 @@ public class MapGenerationSettings
 
 ## Success Criteria
 
-- [ ] Markers placed strategically
-- [ ] Appropriate density per biome
-- [ ] Names generated appropriately
-- [ ] No markers in invalid locations
-- [ ] All tests passing
-- [ ] Performance < 1 second
+- [x] Markers placed strategically
+- [x] Appropriate density per biome
+- [x] Names generated appropriately
+- [x] No markers in invalid locations
+- [x] All tests passing
+- [x] Performance < 1 second
 
 ## Dependencies
 

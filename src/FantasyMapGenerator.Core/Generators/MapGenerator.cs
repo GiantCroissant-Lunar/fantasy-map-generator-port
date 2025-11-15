@@ -222,6 +222,13 @@ public class MapGenerator
             mapData.Routes = routesGenerator.Generate();
         }
 
+        // Generate markers
+        if (settings.GenerateMarkers)
+        {
+            var markersGenerator = new MarkersGenerator(mapData, politicalRng, settings);
+            mapData.Markers = markersGenerator.Generate();
+        }
+
         return mapData;
     }
 

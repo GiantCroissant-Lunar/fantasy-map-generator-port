@@ -93,6 +93,36 @@ public class MapGenerationSettings
     public bool GenerateProvinces { get; set; } = true;
 
     /// <summary>
+    /// Enable marker generation
+    /// </summary>
+    public bool GenerateMarkers { get; set; } = true;
+
+    /// <summary>
+    /// Marker density multiplier
+    /// </summary>
+    public double MarkerDensity { get; set; } = 1.0;
+
+    /// <summary>
+    /// Enable natural markers (volcanoes, hot springs)
+    /// </summary>
+    public bool GenerateNaturalMarkers { get; set; } = true;
+
+    /// <summary>
+    /// Enable historical markers (ruins, battlefields)
+    /// </summary>
+    public bool GenerateHistoricalMarkers { get; set; } = true;
+
+    /// <summary>
+    /// Enable religious markers (sacred sites)
+    /// </summary>
+    public bool GenerateReligiousMarkers { get; set; } = true;
+
+    /// <summary>
+    /// Enable dangerous markers (monster lairs)
+    /// </summary>
+    public bool GenerateDangerousMarkers { get; set; } = true;
+
+    /// <summary>
     /// Minimum burgs per province
     /// </summary>
     public int MinBurgsPerProvince { get; set; } = 3;

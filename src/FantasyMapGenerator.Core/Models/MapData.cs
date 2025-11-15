@@ -322,15 +322,46 @@ public enum RouteType
 public class Marker
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public MarkerType Type { get; set; }
+    public int CellId { get; set; }
     public Point Position { get; set; }
     public string Icon { get; set; } = string.Empty;
-    public string? Note { get; set; }
-    public MarkerType Type { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    
+    // Legacy property for compatibility
+    public string? Note { get => Description; set => Description = value ?? string.Empty; }
 }
 
 public enum MarkerType
 {
+    // Natural Features
+    Volcano,
+    HotSpring,
+    Geyser,
+    Waterfall,
+    Mine,
+    Cave,
+    
+    // Historical
+    Ruins,
+    Battlefield,
+    Monument,
+    AncientTree,
+    
+    // Religious
+    SacredSite,
+    Temple,
+    Shrine,
+    Pilgrimage,
+    
+    // Dangerous
+    MonsterLair,
+    DangerZone,
+    Haunted,
+    Cursed,
+    
+    // Legacy types
     PointOfInterest,
     City,
     Mountain,
