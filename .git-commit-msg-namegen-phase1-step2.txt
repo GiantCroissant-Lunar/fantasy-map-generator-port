@@ -1,0 +1,77 @@
+feat(namegen): Implement Layer 2 - CulturePhonology system
+
+Completed Phase 1, Step 2 of the name generation system.
+
+## What's New
+
+- Implemented `CulturePhonology` class (Layer 2 - Phonology)
+- Created `PhonemeInventory` for organizing sound systems
+- Added `AllophoneRule` for contextual sound changes
+- Built 6 predefined phonology templates
+- Added comprehensive unit tests (28 new tests, 47 total passing)
+
+## CulturePhonology Features
+
+- Phoneme inventory management (consonants, vowels, liquids, nasals, fricatives, stops, sibilants, finals)
+- Phoneme frequency weights for realistic distribution
+- Allophonic rules for contextual sound changes
+- Orthography system (IPA → written form)
+- Phoneme shuffling for language mutation
+- Clone support for creating language variants
+
+## Phonology Templates
+
+Built-in templates based on real-world and fantasy languages:
+
+1. **Germanic** - Hard consonants, consonant clusters (English, German, Norse)
+2. **Romance** - Flowing vowels, softer consonants (Latin, Italian, Spanish)
+3. **Slavic** - Consonant clusters, palatalization (Russian, Polish, Czech)
+4. **Elvish** - Melodic, flowing, lots of liquids (Tolkien-inspired)
+5. **Dwarvish** - Harsh, guttural, consonant clusters
+6. **Orcish** - Simple, brutal, minimal vowels
+
+## Test Coverage
+
+- Phoneme inventory operations
+- Phoneme map creation
+- Orthography application
+- Phoneme shuffling (deterministic with seeds)
+- Weight management
+- Allophone rules
+- All 6 template validations
+- Clone independence
+
+## Architecture Progress
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ NameTypes (burg, state, river, religion, culture, army)│
+├─────────────────────────────────────────────────────────┤
+│ GrammarEngine (RimWorld RulePacks concept)              │
+├─────────────────────────────────────────────────────────┤
+│ MorphologyRules (morphemes, word formation)             │
+├─────────────────────────────────────────────────────────┤
+│ PhonotacticRules (conlang-namegen concepts)             │
+├─────────────────────────────────────────────────────────┤
+│ CulturePhonology (libconlang inspired)                  │ ← DONE
+├─────────────────────────────────────────────────────────┤
+│ SyllableGenerator (base layer)                          │ ✓ DONE
+└─────────────────────────────────────────────────────────┘
+```
+
+## Files Added
+
+- src/FantasyNameGenerator/Phonology/PhonemeInventory.cs
+- src/FantasyNameGenerator/Phonology/AllophoneRule.cs
+- src/FantasyNameGenerator/Phonology/CulturePhonology.cs
+- src/FantasyNameGenerator/Phonology/PhonologyTemplates.cs
+- tests/FantasyNameGenerator.Tests/Phonology/PhonemeInventoryTests.cs
+- tests/FantasyNameGenerator.Tests/Phonology/CulturePhonologyTests.cs
+- tests/FantasyNameGenerator.Tests/Phonology/PhonologyTemplatesTests.cs
+
+## Next Steps
+
+- Phase 1, Step 3: Implement Layer 3 - PhonotacticRules
+- Phase 1, Step 4: Implement Layer 4 - MorphologyRules
+
+Related to spec: .kiro/specs/014-name-generation-system.md
