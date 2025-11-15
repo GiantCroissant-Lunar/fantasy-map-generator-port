@@ -1,0 +1,30 @@
+{
+  "name": "Orcish",
+  "description": "Orcish-inspired phonology. Simple, brutal, harsh sounds.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "ptkbdgmnrsʃχ",
+    "vowels": "aou",
+    "liquids": "r",
+    "nasals": "mn",
+    "fricatives": "sʃχ",
+    "stops": "ptkbdg",
+    "sibilants": "sʃ",
+    "finals": "kgχ"
+  },
+  "orthography": {
+    "ʃ": "sh",
+    "χ": "gh"
+  },
+  "phonotactics": {
+    "structures": ["CVC", "CV"],
+    "forbiddenSequences": ["θ", "ð", "w", "y", "l"],
+    "allowedOnsets": ["gr", "kr", "gh"],
+    "allowedCodas": ["k", "g", "gh"],
+    "maxConsonantCluster": 2,
+    "maxVowelCluster": 1,
+    "minSyllables": 1,
+    "maxSyllables": 2,
+    "enforceSonoritySequencing": false
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Slavic",
+  "description": "Slavic-inspired phonology (Russian, Polish, Czech). Consonant clusters, palatalization.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "ptkbdgmnlrszʃʒʧʤ",
+    "vowels": "aeiouɨ",
+    "liquids": "lrj",
+    "nasals": "mn",
+    "fricatives": "fvszʃʒ",
+    "stops": "ptkbdg",
+    "sibilants": "szʃʒ",
+    "finals": "mnstk"
+  },
+  "orthography": {
+    "ʃ": "sh",
+    "ʒ": "zh",
+    "ʧ": "ch",
+    "ʤ": "j",
+    "ɨ": "y",
+    "j": "y"
+  },
+  "phonotactics": {
+    "structures": ["CVC", "CCVC", "CCCVC", "CV"],
+    "forbiddenSequences": ["θ", "ð"],
+    "allowedOnsets": ["pl", "pr", "tr", "kr", "kl", "br", "bl", "dr", "gr", "gl", "fr", "fl", "st", "sp", "sk", "str", "spr", "skr", "zv", "zd"],
+    "allowedCodas": ["st", "nt", "nd", "mp", "sk", "lt", "rt", "ft", "kt"],
+    "maxConsonantCluster": 4,
+    "maxVowelCluster": 1,
+    "minSyllables": 2,
+    "maxSyllables": 4,
+    "enforceSonoritySequencing": false
+  }
+}

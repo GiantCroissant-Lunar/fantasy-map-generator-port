@@ -1,0 +1,36 @@
+{
+  "name": "Germanic",
+  "description": "Germanic-inspired phonology (English, German, Norse). Hard consonants, consonant clusters, diphthongs.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "ptkbdgmnlrsʃfvθð",
+    "vowels": "aeiouæɑɪʊ",
+    "liquids": "lrw",
+    "nasals": "mnŋ",
+    "fricatives": "fvszʃθð",
+    "stops": "ptkbdg",
+    "sibilants": "sʃz",
+    "finals": "mnstŋ"
+  },
+  "orthography": {
+    "ʃ": "sh",
+    "θ": "th",
+    "ð": "th",
+    "æ": "ae",
+    "ɑ": "a",
+    "ɪ": "i",
+    "ʊ": "u",
+    "ŋ": "ng"
+  },
+  "phonotactics": {
+    "structures": ["CVC", "CCVC", "CVCC", "CV"],
+    "forbiddenSequences": ["θθ", "ðð", "ʃʃ", "nm", "ŋm", "ŋn"],
+    "allowedOnsets": ["pl", "pr", "tr", "kr", "kl", "br", "bl", "dr", "gr", "gl", "fr", "fl", "θr", "ʃr", "st", "sp", "sk"],
+    "allowedCodas": ["st", "nt", "nd", "mp", "ŋk", "lt", "rt", "ft"],
+    "maxConsonantCluster": 3,
+    "maxVowelCluster": 2,
+    "minSyllables": 1,
+    "maxSyllables": 3,
+    "enforceSonoritySequencing": true
+  }
+}

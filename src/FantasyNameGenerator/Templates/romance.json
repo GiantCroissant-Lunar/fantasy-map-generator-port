@@ -1,0 +1,32 @@
+{
+  "name": "Romance",
+  "description": "Romance-inspired phonology (Latin, Italian, Spanish, French). Flowing vowels, softer consonants.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "ptkbdgmnlrsʃ",
+    "vowels": "aeiouəɛɔ",
+    "liquids": "lr",
+    "nasals": "mn",
+    "fricatives": "fvsʃ",
+    "stops": "ptkbdg",
+    "sibilants": "sʃ",
+    "finals": "mnrs"
+  },
+  "orthography": {
+    "ʃ": "sc",
+    "ə": "e",
+    "ɛ": "e",
+    "ɔ": "o"
+  },
+  "phonotactics": {
+    "structures": ["CV", "CVC", "V"],
+    "forbiddenSequences": ["ʃʃ", "ss", "nm", "ŋ"],
+    "allowedOnsets": ["pl", "pr", "tr", "kr", "kl", "br", "bl", "dr", "gr", "gl", "fr", "fl"],
+    "allowedCodas": ["n", "m", "r", "l", "s"],
+    "maxConsonantCluster": 2,
+    "maxVowelCluster": 2,
+    "minSyllables": 2,
+    "maxSyllables": 4,
+    "enforceSonoritySequencing": true
+  }
+}

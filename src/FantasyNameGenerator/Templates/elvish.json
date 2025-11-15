@@ -1,0 +1,32 @@
+{
+  "name": "Elvish",
+  "description": "Elvish-inspired phonology (Tolkien-style). Melodic, flowing, lots of liquids and vowels.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "lmnrwyfθð",
+    "vowels": "aeiouəɛ",
+    "liquids": "lrwy",
+    "nasals": "mn",
+    "fricatives": "fθð",
+    "stops": "pt",
+    "sibilants": "s",
+    "finals": "nmlr"
+  },
+  "orthography": {
+    "θ": "th",
+    "ð": "dh",
+    "ə": "e",
+    "ɛ": "ë"
+  },
+  "phonotactics": {
+    "structures": ["CV", "CVC", "V"],
+    "forbiddenSequences": ["θθ", "ðð", "ww", "yy", "nm", "ŋ"],
+    "allowedOnsets": ["l", "r", "w", "y", "f", "θ", "m", "n"],
+    "allowedCodas": ["n", "m", "l", "r"],
+    "maxConsonantCluster": 1,
+    "maxVowelCluster": 2,
+    "minSyllables": 2,
+    "maxSyllables": 4,
+    "enforceSonoritySequencing": true
+  }
+}

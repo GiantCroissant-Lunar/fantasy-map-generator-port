@@ -1,0 +1,30 @@
+{
+  "name": "Dwarvish",
+  "description": "Dwarvish-inspired phonology. Harsh, guttural, lots of consonant clusters.",
+  "version": "1.0",
+  "inventory": {
+    "consonants": "ptkbdgmnrsʃχ",
+    "vowels": "aeiou",
+    "liquids": "r",
+    "nasals": "mn",
+    "fricatives": "fsʃχ",
+    "stops": "ptkbdg",
+    "sibilants": "sʃ",
+    "finals": "mnrskχ"
+  },
+  "orthography": {
+    "ʃ": "sh",
+    "χ": "kh"
+  },
+  "phonotactics": {
+    "structures": ["CVC", "CCVC", "CVCC"],
+    "forbiddenSequences": ["θ", "ð", "w", "y"],
+    "allowedOnsets": ["kr", "gr", "dr", "br", "kh", "gh"],
+    "allowedCodas": ["k", "g", "r", "n", "m", "kh", "gh"],
+    "maxConsonantCluster": 3,
+    "maxVowelCluster": 1,
+    "minSyllables": 1,
+    "maxSyllables": 3,
+    "enforceSonoritySequencing": false
+  }
+}

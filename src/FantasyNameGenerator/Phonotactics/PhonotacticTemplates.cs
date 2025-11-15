@@ -1,14 +1,34 @@
+using FantasyNameGenerator.Configuration;
+
 namespace FantasyNameGenerator.Phonotactics;
 
 /// <summary>
 /// Predefined phonotactic rule templates for different language types.
+/// Now supports both hardcoded templates and JSON-based templates.
 /// </summary>
 public static class PhonotacticTemplates
 {
+    private static readonly Dictionary<string, PhonotacticRules> _cachedTemplates = new();
+    private static bool _useJsonTemplates = true;
+
+    /// <summary>
+    /// Enable or disable JSON template loading (default: true).
+    /// When disabled, falls back to hardcoded templates.
+    /// </summary>
+    public static bool UseJsonTemplates
+    {
+        get => _useJsonTemplates;
+        set
+        {
+            _useJsonTemplates = value;
+            if (!value)
+                _cachedTemplates.Clear();
+        }
+    }
     /// <summary>
     /// Germanic phonotactics - allows complex consonant clusters
     /// </summary>
-    public static PhonotacticRules Germanic()
+    public static PhonotacticRules Germanic(Random? random = null)
     {
         return new PhonotacticRules
         {
@@ -38,7 +58,7 @@ public static class PhonotacticTemplates
     /// <summary>
     /// Romance phonotactics - simpler, more open syllables
     /// </summary>
-    public static PhonotacticRules Romance()
+    public static PhonotacticRules Romance(Random? random = null)
     {
         return new PhonotacticRules
         {
@@ -68,7 +88,7 @@ public static class PhonotacticTemplates
     /// <summary>
     /// Slavic phonotactics - complex consonant clusters
     /// </summary>
-    public static PhonotacticRules Slavic()
+    public static PhonotacticRules Slavic(Random? random = null)
     {
         return new PhonotacticRules
         {
@@ -98,7 +118,7 @@ public static class PhonotacticTemplates
     /// <summary>
     /// Elvish phonotactics - flowing, melodic
     /// </summary>
-    public static PhonotacticRules Elvish()
+    public static PhonotacticRules Elvish(Random? random = null)
     {
         return new PhonotacticRules
         {
@@ -127,7 +147,7 @@ public static class PhonotacticTemplates
     /// <summary>
     /// Dwarvish phonotactics - harsh, guttural
     /// </summary>
-    public static PhonotacticRules Dwarvish()
+    public static PhonotacticRules Dwarvish(Random? random = null)
     {
         return new PhonotacticRules
         {
@@ -155,7 +175,7 @@ public static class PhonotacticTemplates
     /// <summary>
     /// Orcish phonotactics - simple, brutal
     /// </summary>
-    public static PhonotacticRules Orcish()
+    public static PhonotacticRules Orcish(Random? random = null)
     {
         return new PhonotacticRules
         {
@@ -185,25 +205,104 @@ public static class PhonotacticTemplates
     /// </summary>
     public static Dictionary<string, Func<PhonotacticRules>> GetAllTemplates()
     {
-        return new Dictionary<string, Func<PhonotacticRules>>
+        var templateNames = _useJsonTemplates 
+            ? LanguageTemplateLoader.GetBuiltInTemplateNames()
+            : new[] { "germanic", "romance", "slavic", "elvish", "dwarvish", "orcish" };
+
+        var templates = new Dictionary<string, Func<PhonotacticRules>>();
+        
+        foreach (var name in templateNames)
         {
-            { "germanic", Germanic },
-            { "romance", Romance },
-            { "slavic", Slavic },
-            { "elvish", Elvish },
-            { "dwarvish", Dwarvish },
-            { "orcish", Orcish }
+            templates[name] = () => GetTemplate(name)!;
+        }
+        
+        return templates;
+    }
+
+    /// <summary>
+    /// Get a template by name.
+    /// First tries JSON templates (if enabled), then falls back to hardcoded.
+    /// </summary>
+    public static PhonotacticRules? GetTemplate(string name)
+    {
+        var normalizedName = name.ToLowerInvariant();
+
+        if (_useJsonTemplates)
+        {
+            var template = GetTemplateFromJson(normalizedName);
+            if (template != null)
+                return template;
+        }
+
+        return normalizedName switch
+        {
+            "germanic" => Germanic(),
+            "romance" => Romance(),
+            "slavic" => Slavic(),
+            "elvish" => Elvish(),
+            "dwarvish" => Dwarvish(),
+            "orcish" => Orcish(),
+            _ => null
         };
     }
 
     /// <summary>
-    /// Get a template by name
+    /// Load a template from JSON with caching.
     /// </summary>
-    public static PhonotacticRules? GetTemplate(string name)
+    private static PhonotacticRules? GetTemplateFromJson(string name)
     {
-        var templates = GetAllTemplates();
-        return templates.TryGetValue(name.ToLowerInvariant(), out var factory)
-            ? factory()
-            : null;
+        if (_cachedTemplates.TryGetValue(name, out var cached))
+            return cached.Clone();
+
+        try
+        {
+            var phonology = LanguageTemplateLoader.LoadBuiltIn(name);
+            if (phonology?.Phonotactics != null)
+            {
+                var rules = LanguageTemplateLoader.ConvertPhonotacticsFromJson(phonology.Phonotactics);
+                if (rules != null)
+                {
+                    _cachedTemplates[name] = rules;
+                    return rules.Clone();
+                }
+            }
+        }
+        catch
+        {
+            // Fall back to hardcoded if JSON fails
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Load a custom template from file system.
+    /// </summary>
+    public static PhonotacticRules? LoadCustomTemplate(string filePath)
+    {
+        try
+        {
+            var phonology = LanguageTemplateLoader.LoadFromFile(filePath);
+            return phonology?.Phonotactics != null 
+                ? LanguageTemplateLoader.ConvertPhonotacticsFromJson(phonology.Phonotactics)
+                : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Get all available template names (including custom JSON if in a directory).
+    /// </summary>
+    public static string[] GetAvailableTemplateNames()
+    {
+        if (_useJsonTemplates)
+        {
+            return LanguageTemplateLoader.GetBuiltInTemplateNames();
+        }
+
+        return new[] { "germanic", "romance", "slavic", "elvish", "dwarvish", "orcish" };
     }
 }

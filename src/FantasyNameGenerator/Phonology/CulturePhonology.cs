@@ -34,6 +34,12 @@ public class CulturePhonology
     public Dictionary<char, string> Orthography { get; set; } = new();
 
     /// <summary>
+    /// Phonotactic rules - legal sound combinations and patterns.
+    /// Loaded from JSON templates if available.
+    /// </summary>
+    public Configuration.PhonotacticsJson? Phonotactics { get; set; }
+
+    /// <summary>
     /// Get the weight for a phoneme (default 1.0 if not specified)
     /// </summary>
     public double GetWeight(char phoneme)
@@ -116,7 +122,24 @@ public class CulturePhonology
             Inventory = Inventory.Clone(),
             Weights = new Dictionary<char, double>(Weights),
             Allophones = new List<AllophoneRule>(Allophones),
-            Orthography = new Dictionary<char, string>(Orthography)
+            Orthography = new Dictionary<char, string>(Orthography),
+            Phonotactics = Phonotactics != null ? ClonePhonotactics(Phonotactics) : null
+        };
+    }
+
+    private static Configuration.PhonotacticsJson ClonePhonotactics(Configuration.PhonotacticsJson phonotactics)
+    {
+        return new Configuration.PhonotacticsJson
+        {
+            Structures = phonotactics.Structures?.ToList(),
+            ForbiddenSequences = phonotactics.ForbiddenSequences?.ToList(),
+            AllowedOnsets = phonotactics.AllowedOnsets?.ToList(),
+            AllowedCodas = phonotactics.AllowedCodas?.ToList(),
+            MaxConsonantCluster = phonotactics.MaxConsonantCluster,
+            MaxVowelCluster = phonotactics.MaxVowelCluster,
+            MinSyllables = phonotactics.MinSyllables,
+            MaxSyllables = phonotactics.MaxSyllables,
+            EnforceSonoritySequencing = phonotactics.EnforceSonoritySequencing
         };
     }
 }
