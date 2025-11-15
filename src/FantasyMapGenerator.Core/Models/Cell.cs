@@ -47,6 +47,11 @@ public class Cell
     /// Distance to nearest coast (0 = water, 1 = coastline, 2+ = inland)
     /// </summary>
     public int CoastDistance { get; set; }
+    
+    /// <summary>
+    /// Religion ID for this cell (0 = no religion)
+    /// </summary>
+    public int ReligionId { get; set; }
 
     // Features
     public bool HasRiver { get; set; }

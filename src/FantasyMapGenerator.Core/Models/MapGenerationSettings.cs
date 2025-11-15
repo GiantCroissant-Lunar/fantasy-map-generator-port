@@ -260,6 +260,13 @@ public class MapGenerationSettings
     /// </summary>
     public int CultureCount { get; set; } = 10;
     
+    // === Religions Settings ===
+    
+    /// <summary>
+    /// Number of religions to generate
+    /// </summary>
+    public int ReligionCount { get; set; } = 5;
+    
     /// <summary>
     /// Culture set to use (European, Oriental, HighFantasy, DarkFantasy)
     /// </summary>

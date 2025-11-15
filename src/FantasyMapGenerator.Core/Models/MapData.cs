@@ -26,6 +26,7 @@ public class MapData
     public List<Burg> Burgs { get; set; } = new();
     public List<State> States { get; set; } = new();
     public List<Culture> Cultures { get; set; } = new();
+    public List<Religion> Religions { get; set; } = new();
     public List<Biome> Biomes { get; set; } = new();
 
     // Rivers, lakes, and routes

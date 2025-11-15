@@ -1,56 +1,47 @@
-feat: Implement Spec 008 - Cultures System
+feat: Implement Spec 009 - Religions System
 
-Implemented the complete culture system including:
+Implemented the complete religion system including:
 
 Models:
-- Updated Culture model with new properties (CenterCellId, Type, Expansionism, etc.)
-- Added CultureType enum (Generic, Naval, Lake, Highland, River, Nomadic, Hunting)
-- Added DefaultCulture class for culture definitions
-- Removed legacy enums and properties
+- Created Religion model with all properties (CenterCellId, Type, Expansion, Form, Deities, etc.)
+- Added ReligionType enum (Organized, Folk, Cult, Heresy)
+- Added ExpansionType enum (Global, State, Culture, Homeland)
+- Added Deity model with Name and Sphere
+- Extended Cell model with ReligionId property
 
 Core Implementation:
-- Created CulturesGenerator with full culture selection, placement, and expansion
-- Implemented culture selection from default sets (European, Oriental, HighFantasy, DarkFantasy)
-- Added culture center placement with strategic positioning
-- Implemented Dijkstra algorithm for culture expansion with custom cost functions
-- Added culture type definition based on geography
-- Implemented expansionism calculation based on culture type
-- Added 3-letter culture code generation
+- Created ReligionsGenerator with full religion generation and expansion
+- Implemented religion type determination (weighted random)
+- Implemented expansion type determination (weighted random)
+- Implemented religion form selection (Pantheon, Monotheism, Dualism, etc.)
+- Added deity generation based on religion form
+- Implemented religion origin placement with spacing constraints
 
-Default Culture Sets:
-- Created DefaultCultures static class with 4 culture sets
-- European set: 15 cultures (Shwazen, Angshire, Luari, Norse, etc.)
-- Oriental set: 13 cultures (Koryo, Hantzu, Yamoto, Turchian, etc.)
-- HighFantasy set: 17 cultures (Elfish, Dwarven, Orkish, etc.)
-- DarkFantasy set: 7 cultures (Bloodborn, Shadowkin, Voidwalkers, etc.)
-
-Algorithms:
-- Culture selection with weighted random based on probability
-- Strategic center placement with spacing constraints
-- Dijkstra expansion with culture-specific cost functions
-- Cost calculation based on biome, height, rivers, and geography
-- Statistics collection (area, population, cell count)
+Expansion Algorithms:
+- Global expansion: Distance-based probability spreading
+- State expansion: Spreads within state borders (90% probability)
+- Culture expansion: Spreads within culture borders (80% probability)
+- Homeland expansion: Stays near origin (70% probability within radius)
 
 Helpers:
-- HSL to hex color conversion for culture colors
-- Culture score calculation for placement
-- Culture code generation with uniqueness check
-- Biome, height, river, and type cost functions
+- HSL to hex color conversion for religion colors
+- Distance calculation for expansion
+- Weighted random selection for types
+- Statistics collection (area, population, cell count)
 
 Tests:
-- Created comprehensive CulturesGeneratorTests covering:
-  - Culture creation from defaults
-  - Center assignment
-  - Territory expansion
+- Created comprehensive ReligionsGeneratorTests covering:
+  - Religion creation
+  - Type assignment (ReligionType and ExpansionType)
+  - Deity generation
+  - Origin placement
+  - Religion expansion
   - Statistics calculation
-  - Culture type assignment
-  - Color assignment
-  - Code generation
-  - Expansionism factors
-  - Different culture sets
-  - Name base assignment
 
 Configuration:
-- Added MapGenerationSettings properties (CultureCount, CultureSet, NeutralRate)
+- Added MapGenerationSettings.ReligionCount property
 
-Status: Spec 008 complete and ready for integration
+Integration:
+- Added Religions list to MapData
+
+Status: Spec 009 complete - Phase 2A Foundation COMPLETE!
