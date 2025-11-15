@@ -32,6 +32,9 @@ public class HydrologyGenerator
     private bool _enableRiverErosion = true;
     private int _maxErosionDepth = 5;
     private int _minErosionHeight = 35;
+    private bool _useAdvancedErosion = false;
+    private int _erosionIterations = 5;
+    private double _erosionAmount = 0.1;
     private bool _enableLakeEvaporation = true;
     private double _baseEvaporationRate = 0.5;
 
@@ -66,6 +69,13 @@ public class HydrologyGenerator
         _minErosionHeight = Math.Max(minErosionHeight, 20);
     }
 
+    public void SetAdvancedErosionOptions(bool useAdvancedErosion, int erosionIterations, double erosionAmount)
+    {
+        _useAdvancedErosion = useAdvancedErosion;
+        _erosionIterations = Math.Clamp(erosionIterations, 1, 20);
+        _erosionAmount = Math.Clamp(erosionAmount, 0.01, 1.0);
+    }
+
     public void SetLakeEvaporationOptions(bool enableLakeEvaporation, double baseEvaporationRate)
     {
         _enableLakeEvaporation = enableLakeEvaporation;
@@ -97,8 +107,15 @@ public class HydrologyGenerator
         // Step 6: Calculate river widths
         CalculateRiverWidths();
 
-        // Step 7: Apply river erosion
-        DowncutRivers();
+        // Step 7: Apply erosion (choose algorithm based on settings)
+        if (_useAdvancedErosion)
+        {
+            ApplyAdvancedErosion();
+        }
+        else if (_enableRiverErosion)
+        {
+            DowncutRivers();
+        }
 
         // Step 8: Add river meandering
         AddMeanderingToRivers();
@@ -926,6 +943,76 @@ public class HydrologyGenerator
                 river.Name = $"{names[random.Next(names.Length)]}{suffixes[random.Next(suffixes.Length)]}";
             }
         }
+    }
+
+    /// <summary>
+    /// Advanced erosion algorithm based on mewo2's terrain generator.
+    /// Ported from Choochoo's C# implementation of the Fantasy Map Generator.
+    /// 
+    /// Creates more realistic terrain by considering the number of higher neighbors.
+    /// Cells with 3 higher neighbors are stable, more = deposition, less = erosion.
+    /// 
+    /// Original: https://github.com/mewo2/terrain
+    /// C# Port: https://github.com/Choochoo/FantasyMapGenerator
+    /// </summary>
+    private void ApplyAdvancedErosion()
+    {
+        Console.WriteLine($"Applying advanced erosion ({_erosionIterations} iterations, amount: {_erosionAmount:F2})...");
+
+        const int SEA_LEVEL = 20;
+        const int MAX_HEIGHT = 100;
+
+        int totalCellsChanged = 0;
+
+        for (int iter = 0; iter < _erosionIterations; iter++)
+        {
+            var erosionDeltas = new double[_map.Cells.Count];
+            int cellsChangedThisIteration = 0;
+
+            // Calculate erosion deltas for all land cells
+            foreach (var cell in _map.Cells.Where(c => c.IsLand))
+            {
+                // Count higher neighbors
+                int higherNeighbors = 0;
+                foreach (var neighborId in cell.Neighbors)
+                {
+                    if (neighborId >= 0 && neighborId < _map.Cells.Count)
+                    {
+                        if (_map.Cells[neighborId].Height > cell.Height)
+                        {
+                            higherNeighbors++;
+                        }
+                    }
+                }
+
+                // Erosion proportional to (higher_neighbors - 3)
+                // Cells with 3 neighbors are stable
+                // More than 3 = deposition (positive delta)
+                // Less than 3 = erosion (negative delta)
+                erosionDeltas[cell.Id] = _erosionAmount * (higherNeighbors - 3);
+            }
+
+            // Apply erosion deltas
+            for (int i = 0; i < _map.Cells.Count; i++)
+            {
+                var cell = _map.Cells[i];
+                if (cell.IsLand && Math.Abs(erosionDeltas[i]) > 0.01)
+                {
+                    double newHeight = cell.Height + erosionDeltas[i];
+                    byte clampedHeight = (byte)Math.Clamp((int)Math.Round(newHeight), SEA_LEVEL, MAX_HEIGHT);
+
+                    if (clampedHeight != cell.Height)
+                    {
+                        cell.Height = clampedHeight;
+                        cellsChangedThisIteration++;
+                    }
+                }
+            }
+
+            totalCellsChanged += cellsChangedThisIteration;
+        }
+
+        Console.WriteLine($"Advanced erosion complete: {totalCellsChanged} total cell changes across {_erosionIterations} iterations");
     }
 
     /// <summary>

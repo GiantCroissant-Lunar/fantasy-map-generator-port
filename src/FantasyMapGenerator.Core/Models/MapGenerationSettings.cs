@@ -179,6 +179,21 @@ public class MapGenerationSettings
     /// </summary>
     public int MinErosionHeight { get; set; } = 35;
 
+    /// <summary>
+    /// Use advanced erosion algorithm (neighbor-based) instead of simple river downcutting
+    /// </summary>
+    public bool UseAdvancedErosion { get; set; } = false;
+
+    /// <summary>
+    /// Number of erosion iterations for advanced erosion (3-10 typical)
+    /// </summary>
+    public int ErosionIterations { get; set; } = 5;
+
+    /// <summary>
+    /// Erosion amount per iteration for advanced erosion (0.05-0.2 typical)
+    /// </summary>
+    public double ErosionAmount { get; set; } = 0.1;
+
     // === Lake Evaporation Settings ===
 
     /// <summary>

@@ -165,6 +165,10 @@ public class MapGenerator
             settings.EnableRiverErosion,
             settings.MaxErosionDepth,
             settings.MinErosionHeight);
+        hydrologyGenerator.SetAdvancedErosionOptions(
+            settings.UseAdvancedErosion,
+            settings.ErosionIterations,
+            settings.ErosionAmount);
         hydrologyGenerator.SetLakeEvaporationOptions(
             settings.EnableLakeEvaporation,
             settings.BaseEvaporationRate);
