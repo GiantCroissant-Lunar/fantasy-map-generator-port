@@ -31,11 +31,8 @@ public class CulturesGeneratorTests
         // Add some biomes
         for (int i = 0; i < 15; i++)
         {
-            map.Biomes.Add(new Biome { Id = i, Name = $"Biome{i}", Cost = 50 });
+            map.Biomes.Add(new Biome(i) { Name = $"Biome{i}" });
         }
-
-        // Add a feature
-        map.Features.Add(new Feature { Id = 0, Cells = new List<int>() });
 
         return map;
     }
