@@ -13,4 +13,8 @@
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\ref-projects\Triangle.NET\src\Triangle\Triangle.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,149 +1,166 @@
-# Kiro Specs: Missing Core Features
+# Kiro Specs: Fantasy Map Generator Features
 
-This directory contains Kiro specs for implementing the missing 13% of core features to reach 100% completion.
+This directory contains Kiro specs for implementing all features from the reference projects.
 
 ## Overview
 
-**Current Status**: 87% complete  
-**Target**: 100% complete  
-**Estimated Time**: 2 weeks (10-15 hours total)  
-**Scope**: Core map generation only (no rendering)
-
-## Specs
-
-### High Priority (Week 1)
-
-#### [001: River Meandering Data Generation](./001-river-meandering-data.md)
-**Status**: Draft  
-**Priority**: High ⭐⭐⭐⭐⭐  
-**Effort**: 2-3 hours  
-**Impact**: Huge visual improvement for rendering projects
-
-Generate meandered path points for rivers to enable smooth curve rendering.
-
-**Key Deliverables**:
-- `River.MeanderedPath` property
-- `RiverMeandering` class
-- Integration with `HydrologyGenerator`
+**Phase 1 Status**: ✅ 100% complete (Terrain & Hydrology)  
+**Phase 2 Status**: 🚧 In Progress (World-Building Features)  
+**Total Progress**: 5/16 specs complete (31%)
 
 ---
 
-#### [002: River Erosion Algorithm](./002-river-erosion-algorithm.md)
-**Status**: Draft  
-**Priority**: High ⭐⭐⭐  
-**Effort**: 1-2 hours  
-**Impact**: Adds terrain depth (valleys)
+## Phase 1: Terrain & Hydrology ✅
 
-Implement river erosion to carve valleys into terrain based on water flux.
+**Status**: Complete  
+**Duration**: 2 weeks  
+**Completion Date**: November 15, 2025
 
-**Key Deliverables**:
-- `DowncutRivers()` method
-- Erosion configuration settings
-- Modified `Cell.Height` values
+### Completed Specs
 
----
-
-#### [003: Lake Evaporation Model](./003-lake-evaporation-model.md)
-**Status**: Draft  
-**Priority**: Medium ⭐⭐  
-**Effort**: 3-4 hours  
-**Impact**: Closed basins (Dead Sea style)
-
-Calculate lake evaporation to create closed basins (salt lakes).
-
-**Key Deliverables**:
-- `Lake` class with evaporation properties
-- Lake identification and classification
-- `MapData.Lakes` collection
+1. ✅ [River Meandering](./001-river-meandering-data.md) - Natural river curves
+2. ✅ [River Erosion](./002-river-erosion-algorithm.md) - Downcutting algorithm
+3. ✅ [Lake Evaporation](./003-lake-evaporation-model.md) - Closed basin modeling
+4. ✅ [Advanced Erosion](./004-advanced-erosion-algorithm.md) - Neighbor-based erosion
+5. ✅ [Lloyd Relaxation](./005-lloyd-relaxation.md) - Point distribution improvement
 
 ---
 
-### Medium Priority (Week 2)
+## Phase 2: World-Building Features 🚧
 
-#### [004: Advanced Erosion Algorithm](./004-advanced-erosion-algorithm.md)
-**Status**: Draft  
-**Priority**: Medium ⭐⭐⭐⭐  
-**Effort**: 4-6 hours  
-**Impact**: More realistic terrain  
-**Dependencies**: 002-river-erosion-algorithm
+**Status**: In Progress  
+**Estimated Duration**: 16 weeks  
+**Target Completion**: March 6, 2026
 
-Implement neighbor-based erosion algorithm from reference project.
+### Phase 2A: Foundation (Weeks 1-6) - Critical Path
 
-**Key Deliverables**:
-- `ApplyAdvancedErosion()` method
-- Iterative erosion refinement
-- Alternative to simple erosion
+6. 🔄 [Burgs (Settlements)](./006-burgs-settlement-system.md) - City/town placement
+   - **Priority**: ⭐⭐⭐⭐⭐ Critical
+   - **Effort**: 2 weeks
+   - **Status**: Spec created ✅
+   - **Dependencies**: None
+   - **Blocks**: States, Provinces, Routes
+
+7. 🔄 [States (Political)](./007-states-political-system.md) - Nations and borders
+   - **Priority**: ⭐⭐⭐⭐⭐ Critical
+   - **Effort**: 2 weeks
+   - **Status**: Spec created ✅
+   - **Dependencies**: Burgs (006), Cultures (008)
+   - **Blocks**: Provinces, Diplomacy, Military
+
+8. 🔄 [Cultures](./008-cultures-system.md) - Cultural diversity and spread
+   - **Priority**: ⭐⭐⭐⭐⭐ Critical
+   - **Effort**: 2 weeks
+   - **Status**: Spec created ✅
+   - **Dependencies**: None
+   - **Blocks**: States, Burgs naming
+
+### Phase 2B: Political Systems (Weeks 7-9)
+
+9. 🔄 [Religions](./009-religions-system.md) - Belief systems
+   - **Priority**: ⭐⭐⭐⭐ Important
+   - **Effort**: 1 week
+   - **Status**: Spec created ✅
+   - **Dependencies**: Cultures (008)
+
+10. 🔄 [Provinces](./010-provinces-system.md) - Administrative divisions
+    - **Priority**: ⭐⭐⭐ Medium
+    - **Effort**: 1 week
+    - **Status**: Spec created ✅
+    - **Dependencies**: States (007), Burgs (006)
+
+11. 🔄 [Routes](./011-routes-system.md) - Roads and trade networks
+    - **Priority**: ⭐⭐⭐ Medium
+    - **Effort**: 1 week
+    - **Status**: Spec created ✅
+    - **Dependencies**: Burgs (006), States (007)
+
+### Phase 2C: Infrastructure (Weeks 10-12)
+
+12. 🔄 [Markers](./012-markers-system.md) - Points of interest
+    - **Priority**: ⭐⭐ Nice to have
+    - **Effort**: 1 week
+    - **Status**: Spec created ✅
+    - **Dependencies**: None
+
+13. 🔄 [Military](./013-military-system.md) - Armies and campaigns
+    - **Priority**: ⭐⭐ Nice to have
+    - **Effort**: 1 week
+    - **Status**: Spec created ✅
+    - **Dependencies**: States (007), Burgs (006)
+
+### Phase 2D: Advanced Features (Weeks 13-16)
+
+14. 🔄 [Name Generation](./014-name-generation-system.md) - Linguistic system
+    - **Priority**: ⭐⭐⭐⭐ Important
+    - **Effort**: 2 weeks
+    - **Status**: Spec created ✅
+    - **Dependencies**: Cultures (008)
+
+15. 🔄 [Zones](./015-zones-system.md) - Special areas
+    - **Priority**: ⭐⭐ Nice to have
+    - **Effort**: 3-4 days
+    - **Status**: Spec created ✅
+    - **Dependencies**: None
 
 ---
 
-#### [005: Lloyd Relaxation](./005-lloyd-relaxation.md)
-**Status**: Draft  
-**Priority**: Low ⭐⭐⭐  
-**Effort**: 2-3 hours  
-**Impact**: Better point distribution
+## Progress Tracking
 
-Apply Lloyd relaxation to improve Voronoi cell uniformity.
+### Phase 1: Terrain & Hydrology
+| Spec | Status | Progress |
+|------|--------|----------|
+| 001-river-meandering-data | ✅ Complete | 100% |
+| 002-river-erosion-algorithm | ✅ Complete | 100% |
+| 003-lake-evaporation-model | ✅ Complete | 100% |
+| 004-advanced-erosion-algorithm | ✅ Complete | 100% |
+| 005-lloyd-relaxation | ✅ Complete | 100% |
 
-**Key Deliverables**:
-- `ApplyLloydRelaxation()` in `GeometryUtils`
-- Optional feature (disabled by default)
-- Reduced cell size variance
+**Phase 1 Progress**: 5/5 specs completed (100%) ✅
+
+### Phase 2: World-Building
+| Spec | Status | Progress |
+|------|--------|----------|
+| 006-burgs-settlement-system | 🔄 Spec Created | 10% |
+| 007-states-political-system | 🔄 Spec Created | 10% |
+| 008-cultures-system | 🔄 Spec Created | 10% |
+| 009-religions-system | 🔄 Spec Created | 10% |
+| 010-provinces-system | 🔄 Spec Created | 10% |
+| 011-routes-system | 🔄 Spec Created | 10% |
+| 012-markers-system | 🔄 Spec Created | 10% |
+| 013-military-system | 🔄 Spec Created | 10% |
+| 014-name-generation-system | 🔄 Spec Created | 10% |
+| 015-zones-system | 🔄 Spec Created | 10% |
+
+**Phase 2 Progress**: 10/10 specs created (100%!) 🎉
+
+**Overall Progress**: 5/15 specs completed (33%), 10/15 specs created (67%) 🎉
 
 ---
 
 ## Implementation Order
 
-### Recommended Sequence
+### Current Sprint: Phase 2A Foundation
 
-1. **001: River Meandering** (2-3 hours)
-   - Biggest visual impact
-   - Easiest to implement
-   - No dependencies
+**Week 1-2: Burgs (006)** ← START HERE
+- Settlement placement
+- Port detection
+- Population calculation
+- Feature assignment
 
-2. **002: River Erosion** (1-2 hours)
-   - Complements meandering
-   - Simple algorithm
-   - No dependencies
+**Week 3-4: States (007)**
+- State creation
+- Territorial expansion
+- Diplomacy generation
+- State forms
 
-3. **003: Lake Evaporation** (3-4 hours)
-   - New data model
-   - Moderate complexity
-   - No dependencies
+**Week 5-6: Cultures (008)**
+- Culture placement
+- Cultural expansion
+- Type classification
+- Name bases
 
-4. **004: Advanced Erosion** (4-6 hours)
-   - Depends on 002
-   - More complex
-   - Optional enhancement
-
-5. **005: Lloyd Relaxation** (2-3 hours)
-   - Independent feature
-   - Optional enhancement
-   - Can be done anytime
-
-### Alternative Sequence (Parallel Work)
-
-**Track A** (Rivers):
-1. 001: River Meandering
-2. 002: River Erosion
-3. 004: Advanced Erosion
-
-**Track B** (Water Bodies):
-1. 003: Lake Evaporation
-
-**Track C** (Geometry):
-1. 005: Lloyd Relaxation
-
-## Progress Tracking
-
-| Spec | Status | Progress | Completed |
-|------|--------|----------|-----------|
-| 001-river-meandering-data | Draft | 0% | ⬜ |
-| 002-river-erosion-algorithm | Draft | 0% | ⬜ |
-| 003-lake-evaporation-model | Draft | 0% | ⬜ |
-| 004-advanced-erosion-algorithm | Draft | 0% | ⬜ |
-| 005-lloyd-relaxation | Draft | 0% | ⬜ |
-
-**Overall Progress**: 0/5 specs completed (0%)
+---
 
 ## Using These Specs
 
@@ -163,6 +180,8 @@ Apply Lloyd relaxation to improve Voronoi cell uniformity.
 4. Update the spec status
 5. Move to next spec
 
+---
+
 ## Testing Strategy
 
 Each spec includes:
@@ -176,39 +195,48 @@ Run all tests after each spec:
 dotnet test
 ```
 
+---
+
 ## Documentation
 
 After completing specs, update:
 - [ ] `docs/EXECUTIVE_SUMMARY.md` - Update completion percentage
-- [ ] `docs/QUICK_START_MISSING_FEATURES.md` - Mark features as complete
-- [ ] `docs/CORE_FOCUSED_ROADMAP.md` - Update progress
+- [ ] `docs/PHASE_2_WORLD_BUILDING_ROADMAP.md` - Update progress
 - [ ] `README.md` - Update status
+- [ ] `COMPLETION_SUMMARY.md` - Add new features
+
+---
 
 ## Success Criteria
 
-**Project is 100% complete when**:
-- ✅ All 5 specs implemented
+**Phase 2A Complete When**:
+- ✅ Burgs, States, and Cultures implemented
 - ✅ All tests passing
 - ✅ Documentation updated
-- ✅ No breaking changes to existing API
 - ✅ Performance targets met
+
+**Phase 2 Complete When**:
+- ✅ All 12 world-building specs implemented
+- ✅ Full feature parity with Azgaar's generator
+- ✅ Production-ready quality
+
+---
 
 ## References
 
 - **Original Azgaar**: `ref-projects/Fantasy-Map-Generator/`
 - **Reference C# Port**: `ref-projects/FantasyMapGenerator/`
-- **Documentation**: `docs/`
-- **Comparison**: `docs/COMPARISON_WITH_ORIGINAL.md`
+- **Phase 2 Roadmap**: `docs/PHASE_2_WORLD_BUILDING_ROADMAP.md`
 - **Analysis**: `docs/REFERENCE_PROJECT_ANALYSIS.md`
-
-## Notes
-
-- All specs focus on **core data generation** only
-- No rendering code in these specs
-- External projects (HyacinthBean.MapViewer) handle visualization
-- Maintain clean separation of concerns
-- Keep Core library rendering-agnostic
 
 ---
 
-**Ready to start? Begin with [001: River Meandering Data Generation](./001-river-meandering-data.md)!** 🚀
+## Legend
+
+- ✅ **Complete** - Implemented, tested, and documented
+- 🔄 **In Progress** - Spec created, implementation pending
+- ⏳ **Planned** - Not yet started
+
+---
+
+**Ready to start Phase 2? Begin with [006: Burgs (Settlements)](./006-burgs-settlement-system.md)!** 🚀

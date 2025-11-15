@@ -380,12 +380,12 @@ public static class GeometryUtils
             // Move each point to its cell's centroid
             for (int i = 0; i < relaxedPoints.Count; i++)
             {
-                var cell = voronoi.Cells[i];
+                var cellVertices = voronoi.GetCellVertices(i);
                 
-                if (cell.Vertices.Count >= 3)
+                if (cellVertices.Count >= 3)
                 {
                     // Calculate centroid of the Voronoi cell
-                    var centroid = CalculateCentroid(cell.Vertices);
+                    var centroid = CalculateCentroid(cellVertices);
 
                     // Keep within bounds
                     centroid = new Point(
@@ -420,4 +420,5 @@ public static class GeometryUtils
 
         return new Point(x, y);
     }
+
 }
