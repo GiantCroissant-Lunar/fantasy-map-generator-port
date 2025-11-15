@@ -1,8 +1,19 @@
 # Quick Start: Implementing Missing Features
 
+## ⚠️ Important: Project Scope
+
+**This project focuses on**: Core map generation (data, algorithms)  
+**Rendering handled by**: External projects (HyacinthBean.MapViewer, etc.)
+
+**What this means**: We generate rich data structures. External projects render them.
+
+---
+
 ## TL;DR - What You Need to Know
 
-Your Fantasy Map Generator port is **87% complete** and architecturally superior to the original. Here are the 4 missing features that will bring it to 100%:
+Your Fantasy Map Generator port is **87% complete** and architecturally superior to the original. Here are the **3 core features** that will bring it to 100%:
+
+**Note**: Smooth rendering (#4) is handled by external rendering projects, not this Core library.
 
 ---
 
@@ -118,11 +129,13 @@ private void CalculateLakeEvaporation(Lake lake)
 
 ---
 
-## 4. 🎨 Smooth Terrain Rendering (1-2 days)
+## 4. 🎨 Smooth Terrain Rendering (OUT OF SCOPE)
 
 **What**: Contour-based rendering instead of blocky cells  
 **Why**: Professional cartography look  
-**Impact**: ⭐⭐⭐⭐ (Publication quality)
+**Status**: ❌ **Handled by external rendering projects** (HyacinthBean.MapViewer, etc.)
+
+**This Core library provides the data. Rendering projects visualize it.**
 
 ### Before vs After
 ```

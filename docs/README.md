@@ -2,10 +2,47 @@
 
 This directory contains comprehensive documentation for adopting modern .NET libraries and implementing advanced features in the Fantasy Map Generator port.
 
+---
+
+## 🎯 Quick Start
+
+**New to this project?** Start here:
+
+1. **[PROJECT_SCOPE.md](./PROJECT_SCOPE.md)** ⚠️ **READ THIS FIRST** - Core vs Rendering separation
+2. **[EXECUTIVE_SUMMARY.md](./EXECUTIVE_SUMMARY.md)** - 5-minute overview of project status
+3. **[CORE_FOCUSED_ROADMAP.md](./CORE_FOCUSED_ROADMAP.md)** - 2-week plan for core features
+4. **[QUICK_START_MISSING_FEATURES.md](./QUICK_START_MISSING_FEATURES.md)** - Quick reference
+
+**Current Status**: 87% complete with superior architecture ✅  
+**Scope**: Core map generation only. Rendering handled by external projects.
+
+---
+
 ## 📚 Documentation Index
 
+### 🎯 [Executive Summary](./EXECUTIVE_SUMMARY.md) ⭐ START HERE
+**5-minute read** - Project status, comparisons, recommendations, and next steps.
+
+### 🚀 [Quick Start: Missing Features](./QUICK_START_MISSING_FEATURES.md)
+**Quick reference** - The 4 missing features with code snippets and time estimates.
+
+### 🗺️ [Implementation Roadmap](./IMPLEMENTATION_ROADMAP.md)
+**3-week plan** - Detailed timeline, testing strategy, and success criteria.
+
+### 📖 [Missing Features Guide](./MISSING_FEATURES_GUIDE.md)
+**Technical deep-dive** - Complete implementations with algorithms and examples.
+
+### 🔍 [Comparison with Original](./COMPARISON_WITH_ORIGINAL.md)
+**Feature analysis** - Side-by-side comparison with Azgaar's JavaScript implementation.
+
+### 🏗️ [Reference Project Analysis](./REFERENCE_PROJECT_ANALYSIS.md)
+**Algorithm study** - What to adopt from Choochoo's C# port (mewo2 approach).
+
+### 📋 [Code Review Recommendations](./CODE_REVIEW_RECOMMENDATIONS.md)
+**Code quality** - 22 recommendations for modernization and best practices.
+
 ### 🗺️ [Library Adoption Roadmap](./library-adoption-roadmap.md)
-**Start here!** High-level overview of recommended libraries, migration strategy, and implementation milestones.
+**Library strategy** - Recommended libraries, migration strategy, and implementation milestones.
 
 **Topics covered**:
 - Current implementation analysis
