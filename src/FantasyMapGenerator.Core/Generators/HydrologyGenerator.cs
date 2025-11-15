@@ -32,6 +32,8 @@ public class HydrologyGenerator
     private bool _enableRiverErosion = true;
     private int _maxErosionDepth = 5;
     private int _minErosionHeight = 35;
+    private bool _enableLakeEvaporation = true;
+    private double _baseEvaporationRate = 0.5;
 
     public HydrologyGenerator(MapData map, IRandomSource random)
     {
@@ -64,6 +66,12 @@ public class HydrologyGenerator
         _minErosionHeight = Math.Max(minErosionHeight, 20);
     }
 
+    public void SetLakeEvaporationOptions(bool enableLakeEvaporation, double baseEvaporationRate)
+    {
+        _enableLakeEvaporation = enableLakeEvaporation;
+        _baseEvaporationRate = Math.Max(baseEvaporationRate, 0.0);
+    }
+
     /// <summary>
     /// Generate complete hydrology system for the map
     /// </summary>
@@ -83,8 +91,8 @@ public class HydrologyGenerator
         // Step 4: Generate rivers
         GenerateRivers();
 
-        // Step 5: Identify lakes
-        IdentifyLakes();
+        // Step 5: Identify lakes with evaporation modeling
+        IdentifyLakesWithEvaporation();
 
         // Step 6: Calculate river widths
         CalculateRiverWidths();
@@ -464,11 +472,18 @@ public class HydrologyGenerator
     }
 
     /// <summary>
-    /// Identify lake cells (filled depressions)
+    /// Identify lakes and calculate evaporation to determine closed basins.
+    /// Based on Azgaar's Fantasy Map Generator lake evaporation model.
     /// </summary>
-    private void IdentifyLakes()
+    private void IdentifyLakesWithEvaporation()
     {
-        // Lakes are flat regions surrounded by higher terrain
+        if (!_enableLakeEvaporation)
+        {
+            Console.WriteLine("Lake evaporation modeling disabled");
+            return;
+        }
+
+        // Find potential lake cells (flat regions surrounded by higher terrain)
         var lakeCandidates = new Dictionary<int, List<int>>(); // elevation → cells
 
         foreach (var cell in _map.Cells)
@@ -491,8 +506,9 @@ public class HydrologyGenerator
             }
         }
 
-        // Group connected lake cells at same elevation
-        var lakes = new List<List<int>>();
+        // Group connected lake cells into Lake objects
+        var lakes = new List<Lake>();
+        int lakeId = 0;
 
         foreach (var (elevation, cells) in lakeCandidates)
         {
@@ -501,14 +517,25 @@ public class HydrologyGenerator
             while (remaining.Count > 0)
             {
                 var seed = remaining.First();
-                var lake = FloodFillLake(seed, elevation, remaining);
+                var lakeCells = FloodFillLake(seed, elevation, remaining);
 
-                if (lake.Count >= 3) // Minimum lake size
+                if (lakeCells.Count >= 3) // Minimum lake size
                 {
+                    var lake = new Lake
+                    {
+                        Id = lakeId++,
+                        Cells = lakeCells
+                    };
+
+                    // Calculate lake properties
+                    CalculateLakeProperties(lake);
+                    CalculateLakeEvaporation(lake);
+                    DetermineLakeOutlet(lake);
+
                     lakes.Add(lake);
 
                     // Mark cells as lake
-                    foreach (var cellId in lake)
+                    foreach (var cellId in lakeCells)
                     {
                         _map.Cells[cellId].Feature = -1; // Special value for lake
                     }
@@ -516,7 +543,10 @@ public class HydrologyGenerator
             }
         }
 
-        Console.WriteLine($"Identified {lakes.Count} lakes");
+        _map.Lakes = lakes;
+
+        int closedLakes = lakes.Count(l => l.IsClosed);
+        Console.WriteLine($"Identified {lakes.Count} lakes ({closedLakes} closed basins)");
     }
 
     /// <summary>
@@ -553,6 +583,139 @@ public class HydrologyGenerator
         }
 
         return lake;
+    }
+
+    /// <summary>
+    /// Calculate lake properties: temperature, precipitation, surface area, inflow
+    /// </summary>
+    private void CalculateLakeProperties(Lake lake)
+    {
+        if (lake.Cells.Count == 0) return;
+
+        // Calculate average temperature and precipitation
+        double totalTemp = 0;
+        double totalPrecip = 0;
+
+        foreach (var cellId in lake.Cells)
+        {
+            var cell = _map.Cells[cellId];
+            totalTemp += cell.Temperature;
+            totalPrecip += cell.Precipitation;
+        }
+
+        lake.Temperature = totalTemp / lake.Cells.Count;
+        lake.Precipitation = totalPrecip / lake.Cells.Count;
+
+        // Calculate surface area (simplified: each cell = 1 km²)
+        lake.SurfaceArea = lake.Cells.Count;
+
+        // Find shoreline cells (land neighbors of lake)
+        var shoreline = new HashSet<int>();
+        foreach (var cellId in lake.Cells)
+        {
+            var cell = _map.Cells[cellId];
+            foreach (var neighborId in cell.Neighbors)
+            {
+                if (neighborId >= 0 && neighborId < _map.Cells.Count)
+                {
+                    var neighbor = _map.Cells[neighborId];
+                    if (neighbor.Height > cell.Height && !neighbor.IsOcean)
+                    {
+                        shoreline.Add(neighborId);
+                    }
+                }
+            }
+        }
+        lake.Shoreline = shoreline.ToList();
+
+        // Calculate inflow from rivers
+        lake.Inflow = 0;
+        foreach (var river in _map.Rivers)
+        {
+            // Check if river flows into this lake
+            if (river.Cells.Count > 0)
+            {
+                var mouthCell = river.Cells[^1];
+                if (lake.Cells.Contains(mouthCell))
+                {
+                    // River flows into lake
+                    lake.InflowingRivers.Add(river.Id);
+
+                    // Add river's flux as inflow
+                    if (_flowAccumulation.TryGetValue(mouthCell, out int flux))
+                    {
+                        lake.Inflow += flux;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calculate lake evaporation based on temperature, surface area, and precipitation
+    /// </summary>
+    private void CalculateLakeEvaporation(Lake lake)
+    {
+        const double PRECIP_REDUCTION_FACTOR = 0.3;
+
+        // Base evaporation increases with temperature
+        // Temperature typically ranges from -20 to +30°C
+        double tempFactor = Math.Max(lake.Temperature + 10, 0) / 30.0;
+        double baseEvaporation = lake.SurfaceArea * tempFactor * _baseEvaporationRate;
+
+        // Precipitation reduces net evaporation
+        double precipReduction = lake.Precipitation * lake.SurfaceArea * PRECIP_REDUCTION_FACTOR;
+
+        lake.Evaporation = Math.Max(baseEvaporation - precipReduction, 0);
+    }
+
+    /// <summary>
+    /// Determine lake outlet and classify lake type
+    /// </summary>
+    private void DetermineLakeOutlet(Lake lake)
+    {
+        if (lake.IsClosed)
+        {
+            // Closed basin - no outlet
+            lake.OutletCell = -1;
+            lake.OutletRiver = null;
+            lake.Type = LakeType.Saltwater;
+        }
+        else
+        {
+            // Open lake - find lowest shoreline point as outlet
+            if (lake.Shoreline.Count > 0)
+            {
+                int lowestShorelineCell = lake.Shoreline[0];
+                int lowestHeight = _map.Cells[lowestShorelineCell].Height;
+
+                foreach (var shorelineCellId in lake.Shoreline)
+                {
+                    var cell = _map.Cells[shorelineCellId];
+                    if (cell.Height < lowestHeight)
+                    {
+                        lowestHeight = cell.Height;
+                        lowestShorelineCell = shorelineCellId;
+                    }
+                }
+
+                lake.OutletCell = lowestShorelineCell;
+            }
+
+            // Classify based on net outflow
+            if (lake.NetOutflow < lake.Inflow * 0.1)
+            {
+                lake.Type = LakeType.Brackish; // Minimal outflow
+            }
+            else if (lake.NetOutflow < lake.Inflow * 0.5)
+            {
+                lake.Type = LakeType.Seasonal; // Moderate outflow
+            }
+            else
+            {
+                lake.Type = LakeType.Freshwater; // Good outflow
+            }
+        }
     }
 
     /// <summary>

@@ -28,8 +28,9 @@ public class MapData
     public List<Culture> Cultures { get; set; } = new();
     public List<Biome> Biomes { get; set; } = new();
 
-    // Rivers and routes
+    // Rivers, lakes, and routes
     public List<River> Rivers { get; set; } = new();
+    public List<Lake> Lakes { get; set; } = new();
     public List<Route> Routes { get; set; } = new();
     public List<Marker> Markers { get; set; } = new();
 

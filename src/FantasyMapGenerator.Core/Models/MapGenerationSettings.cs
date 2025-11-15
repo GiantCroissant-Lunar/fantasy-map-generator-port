@@ -179,6 +179,18 @@ public class MapGenerationSettings
     /// </summary>
     public int MinErosionHeight { get; set; } = 35;
 
+    // === Lake Evaporation Settings ===
+
+    /// <summary>
+    /// Enable lake evaporation modeling
+    /// </summary>
+    public bool EnableLakeEvaporation { get; set; } = true;
+
+    /// <summary>
+    /// Base evaporation rate (m³/s per km² per degree)
+    /// </summary>
+    public double BaseEvaporationRate { get; set; } = 0.5;
+
     // === Advanced Noise Settings ===
 
     /// <summary>

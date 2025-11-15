@@ -165,6 +165,9 @@ public class MapGenerator
             settings.EnableRiverErosion,
             settings.MaxErosionDepth,
             settings.MinErosionHeight);
+        hydrologyGenerator.SetLakeEvaporationOptions(
+            settings.EnableLakeEvaporation,
+            settings.BaseEvaporationRate);
         hydrologyGenerator.Generate();
         // Quick diagnostic: rivers summary
         try
